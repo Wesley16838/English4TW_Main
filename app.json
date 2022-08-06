@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "English4TW_Main",
+    "name": "English4TW Main",
     "slug": "English4TW_Main",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,13 +18,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.english4twmain.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.english4twmain.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
