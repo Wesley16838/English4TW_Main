@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { NavigationProp, ParamListBase, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import * as Speech from 'expo-speech';
@@ -104,9 +106,7 @@ const WordComparePage = () => {
   }
 
   const {data: firstData, isLoading: isLoadingFirst} = getWords(first)
-  const {data: secondData, isLoading: isLoadingSecond} = getWords(second)
-  console.log('first,', firstData, isLoadingFirst)
-  console.log('second,', secondData, isLoadingSecond)
+  const {data: secondData, isLoading: isLoadingSecond, refetch} = getWords(second || compareWord)
   let speech = ""
   if(!isLoadingFirst && !isLoadingSecond) {
     const firstSpeechArr = Object.keys(firstData.content)
@@ -142,119 +142,145 @@ const WordComparePage = () => {
             <Button
               title=""
               image={images.icons.close_icon}
-              customStyle={{}}
+              buttonStyle={{height: 30, width: 30}}
               imageSize={{ height: 30, width: 30, marginRight: 0 }}
               type=""
               onPress={() => handleClose()}
             />
           </View>
-          <ScrollView contentInset={{top: 0}} showsVerticalScrollIndicator={false} automaticallyAdjustContentInsets={false}>
-            {
-              isLoadingFirst || isLoadingSecond ? 
-                <View style={styles.centeredView}>
-                  <ActivityIndicator size="large" />
-                </View> 
-                :
-                <View style={styles.sectionColumn}>
-                  <View
-                    style={{
-                      marginBottom: 30,
-                      marginTop: 20,
-                    }}
-                  >
-                    <View style={{flexDirection: "row", alignItems: "center"}}>
-                      <Text style={styles.compareWord}>{first}</Text>
-                      <TouchableWithoutFeedback onPress={() => handleOnWordPlay(first)}>
-                        <Image
-                          source={Images.icons.volume_icon}
-                          style={{ width: 30, height: 30 }}
-                        />
-                      </TouchableWithoutFeedback>
-                    </View>
-                  
-                    <View style={styles.labelContainer}>
-                      <Label title={speechObj[speech]}/>
-                    </View>
-                    <View style={styles.desWrapper}>
-                      {
-                        firstData.content[speech]['simple'].map((obj: any) => {
-                          return obj['definitions'].map((def: string) => {
-                            return <Text style={styles.compareWordDes}>{def}</Text>
-                          })
-                        })
-                      }
-                    </View>
-                  </View>
-                  <View
-                    style={{
-                      alignItems: "center",
-                      height: 20,
-                      justifyContent: "center",
-                      flexDirection: "row"
-                    }}
-                  >
-                    <View style={{borderBottomColor: "#4F4F4F", borderBottomWidth: 1, flex: 1}}/>
-                    <Text style={{marginHorizontal: 10, color: "#828282", fontWeight: "bold", fontSize: 17}}>VS</Text>
-                    <View style={{borderBottomColor: "#4F4F4F", borderBottomWidth: 1, flex: 1}}/>
-                  </View>
-                  <View
-                    style={{
-                      marginBottom: 30,
-                      marginTop: 20,
-                    }}
-                  >
-                    {second.length === 0 ? (
-                      <>
-                        <InputBox
-                          OnChangeText={(str: string) => setCompareWord(str)}
-                          customStyle={{
-                            width: DEVICE_WIDTH - 40,
-                            height: 40,
-                            marginTop: 20,
-                          }}
-                          placeHolder={"輸入內容"}
-                          placeHolderTextColor={Colors.primary_light}
-                          value={compareWord}
-                        />
-                        {false && (
-                          <>
-                            <Text style={styles.compareWordKK}>{second}</Text>
-                            <View style={styles.labelContainer}>
-                              <Label title={speechObj[speech]} />
-                            </View>
-                            <Text style={styles.compareWordDes}>{second}</Text>
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                         <View style={{flexDirection: "row", alignItems: "center"}}>
-                          <Text style={styles.compareWord}>{second}</Text>
-                          <TouchableWithoutFeedback onPress={() => handleOnWordPlay(second)}>
-                            <Image
-                              source={Images.icons.volume_icon}
-                              style={{ width: 30, height: 30 }}
-                            />
-                          </TouchableWithoutFeedback>
-                        </View>
-                        <View style={styles.labelContainer}>
-                          <Label title={speechObj[speech]}/>
-                        </View>
-                        <View style={styles.desWrapper}>
-                          {
-                            secondData.content[speech]['simple'].map((obj: any) => {
-                              return obj['definitions'].map((def: string) => {
-                                return <Text style={styles.compareWordDes}>{def}</Text>
-                              })
+          <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.container}>
+            <ScrollView contentInset={{top: 0, bottom: 60}} showsVerticalScrollIndicator={false} automaticallyAdjustContentInsets={false}>
+              {
+                isLoadingFirst || isLoadingSecond ? 
+                  <View style={styles.centeredView}>
+                    <ActivityIndicator size="large" />
+                  </View> 
+                  :
+                  <View style={styles.sectionColumn}>
+                    <View
+                      style={{
+                        marginBottom: 30,
+                        marginTop: 20,
+                      }}
+                    >
+                      <View style={{flexDirection: "row", alignItems: "center"}}>
+                        <Text style={styles.compareWord}>{first}</Text>
+                        <TouchableWithoutFeedback onPress={() => handleOnWordPlay(first)}>
+                          <Image
+                            source={Images.icons.volume_icon}
+                            style={{ width: 30, height: 30 }}
+                          />
+                        </TouchableWithoutFeedback>
+                      </View>
+                    
+                      <View style={styles.labelContainer}>
+                        <Label title={speechObj[speech || Object.keys(firstData.content)[0]]}/>
+                      </View>
+                      <View style={styles.desWrapper}>
+                        {
+                          firstData.content[speech || Object.keys(firstData.content)[0]]['simple'].map((obj: any) => {
+                            return obj['definitions'].map((def: string) => {
+                              return <Text style={styles.compareWordDes}>{def}</Text>
                             })
+                          })
+                        }
+                      </View>
+                    </View>
+                    <View
+                      style={{
+                        alignItems: "center",
+                        height: 20,
+                        justifyContent: "center",
+                        flexDirection: "row"
+                      }}
+                    >
+                      <View style={{borderBottomColor: "#4F4F4F", borderBottomWidth: 1, flex: 1}}/>
+                      <Text style={{marginHorizontal: 10, color: "#828282", fontWeight: "bold", fontSize: 17}}>VS</Text>
+                      <View style={{borderBottomColor: "#4F4F4F", borderBottomWidth: 1, flex: 1}}/>
+                    </View>
+                    <View
+                      style={{
+                        marginBottom: 30,
+                        marginTop: 20,
+                      }}
+                    >
+                      {second.length === 0 ? (
+                        <>
+                          <InputBox
+                            OnChangeText={(str: string) => setCompareWord(str)}
+                            customStyle={{
+                              width: DEVICE_WIDTH - 40,
+                              height: 40,
+                              marginTop: 20,
+                            }}
+                            placeHolder={"輸入內容"}
+                            placeHolderTextColor={Colors.primary_light}
+                            value={compareWord}
+                            onClick={() => refetch()}
+                            returnKeyType={"done"}
+                          />
+                          {speech ? 
+                            <>
+                              <View style={{flexDirection: "row", alignItems: "center"}}>
+                                <Text style={styles.compareWord}>{second}</Text>
+                                <TouchableWithoutFeedback onPress={() => handleOnWordPlay(second)}>
+                                  <Image
+                                    source={Images.icons.volume_icon}
+                                    style={{ width: 30, height: 30 }}
+                                  />
+                                </TouchableWithoutFeedback>
+                              </View>
+                              <View style={styles.labelContainer}>
+                                <Label title={speechObj[speech]}/>
+                              </View>
+                              <View style={styles.desWrapper}>
+                                {
+                                  secondData.content[speech]['simple'].map((obj: any) => {
+                                    return obj['definitions'].map((def: string) => {
+                                      return <Text style={styles.compareWordDes}>{def}</Text>
+                                    })
+                                  })
+                                }
+                              </View>
+                            </>
+                            :
+                            <View style={styles.desWrapper}>
+                              <Text style={styles.compareWordDes}>無相同詞性</Text>
+                            </View>
                           }
-                        </View>
-                      </>
-                    )}
+                        </>
+                      ) : (
+                        <>
+                          <View style={{flexDirection: "row", alignItems: "center"}}>
+                            <Text style={styles.compareWord}>{second}</Text>
+                            <TouchableWithoutFeedback onPress={() => handleOnWordPlay(second)}>
+                              <Image
+                                source={Images.icons.volume_icon}
+                                style={{ width: 30, height: 30 }}
+                              />
+                            </TouchableWithoutFeedback>
+                          </View>
+                          <View style={styles.labelContainer}>
+                            <Label title={speechObj[speech]}/>
+                          </View>
+                          <View style={styles.desWrapper}>
+                            {
+                              secondData.content[speech]['simple'].map((obj: any) => {
+                                return obj['definitions'].map((def: string) => {
+                                  return <Text style={styles.compareWordDes}>{def}</Text>
+                                })
+                              })
+                            }
+                          </View>
+                        </>
+                      )}
+                    </View>
                   </View>
-                </View>
-            }
-          </ScrollView>
+              }
+            </ScrollView>
+          </KeyboardAvoidingView>
         </Animated.View>
       </View>
     </View>
@@ -286,6 +312,7 @@ const styles = StyleSheet.create({
   sectionRow: {
     height: 67,
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "flex-end",
     borderBottomColor: Colors.gray_4,
     paddingHorizontal: 20,

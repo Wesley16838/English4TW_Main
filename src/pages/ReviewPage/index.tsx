@@ -28,6 +28,7 @@ const CommentItem: React.FC<IComment> = ({ name, date, content, index }) => {
   );
 };
 const ReviewPage = ({ navigation }: { navigation: any }) => {
+  const [textVal, setTextVal] = useState("")
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [reviews, setReviews] = useState(["1"]);
   const handleBack = () => {
@@ -38,7 +39,7 @@ const ReviewPage = ({ navigation }: { navigation: any }) => {
     }).start();
     navigation.goBack();
   };
-
+  const handleOnClick = () => {}
   return (
     <View style={{ flexDirection: "column", alignItems: "center" }}>
       <View
@@ -54,7 +55,7 @@ const ReviewPage = ({ navigation }: { navigation: any }) => {
           <Button
             title=""
             image={images.icons.leftarrow_icon}
-            customStyle={{}}
+            buttonStyle={{height: 20, width: 12}}
             imageSize={{ height: 20, width: 12, marginRight: 0 }}
             type=""
             onPress={() => handleBack()}
@@ -69,7 +70,8 @@ const ReviewPage = ({ navigation }: { navigation: any }) => {
         <View style={{ flex: 1 }} />
       </View>
       <TextArea
-        OnClick={() => {}}
+        value={textVal}
+        OnChangeText={(str: string) => setTextVal(str)}
         placeHolder={"輸入內容"}
         customStyle={{ width: DEVICE_WIDTH - 40, height: 150 }}
         placeHolderTextColor={Colors.primary_light}
@@ -80,6 +82,7 @@ const ReviewPage = ({ navigation }: { navigation: any }) => {
           height: 30,
           borderRadius: 16,
         }}
+        OnClick={() => handleOnClick()}
       />
       {reviews.length === 0 && (
         <View

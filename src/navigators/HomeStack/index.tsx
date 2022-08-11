@@ -6,6 +6,7 @@ import WordComparePage from "pages/WordComparePage";
 import WordDetailPage from "pages/WordDetailPage";
 import SentenceExamplesPage from "pages/SentenceExamplesPage";
 import SplashPage from "pages/SplashPage";
+import { shallowEqual, useSelector } from "react-redux";
 const HomeStack = createStackNavigator();
 const forFade = ({ current }: { current: any }) => ({
   cardStyle: {
@@ -13,6 +14,10 @@ const forFade = ({ current }: { current: any }) => ({
   },
 });
 const HomeStackNavigator = () => {
+  const {isLoggedIn}: any = useSelector(
+    (state: any) => state.user,
+    shallowEqual
+  );
   return (
     <HomeStack.Navigator
       screenOptions={{
@@ -33,29 +38,29 @@ const HomeStackNavigator = () => {
         component={HomePage}
         options={{ animationEnabled: false, gestureEnabled: false }}
       />
-      <HomeStack.Screen
+      {isLoggedIn && <HomeStack.Screen
         name={"SentenceAnalysisPage"}
         component={SentenceAnalysisPage}
         options={{ cardStyleInterpolator: forFade, gestureEnabled: false }}
-      />
-      <HomeStack.Screen
+      />}
+      {isLoggedIn && <HomeStack.Screen
         name={"WordComparePage"}
         component={WordComparePage}
         options={{ cardStyleInterpolator: forFade, gestureEnabled: false }}
         initialParams={{ first: "", second: "" }}
-      />
-      <HomeStack.Screen
+      />}
+      {isLoggedIn && <HomeStack.Screen
         name={"SentenceExamplesPage"}
         component={SentenceExamplesPage}
         options={{ cardStyleInterpolator: forFade, gestureEnabled: false }}
         initialParams={{ sentence: "" }}
-      />
-      <HomeStack.Screen
+      />}
+      {isLoggedIn && <HomeStack.Screen
         name={"WordDetailPage"}
         component={WordDetailPage}
         options={{ animationEnabled: false, gestureEnabled: false }}
         initialParams={{ word: "" }}
-      />
+      />}
     </HomeStack.Navigator>
   );
 };

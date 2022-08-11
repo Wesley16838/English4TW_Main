@@ -107,6 +107,10 @@ const Typography = {
         fontSize: Font.FONT_SIZE_XS,
         color: Colors.gray_3
     },
+    error: {
+        fontSize: Font.FONT_SIZE_BASE,
+        color: Colors.red
+    }
     
 }
 

@@ -26,6 +26,7 @@ import { Colors, Spacing, Typography } from "styles";
 import LinearGradientLayout from "components/LinearGradientLayout";
 import { ScrollView } from "react-native-gesture-handler";
 import * as Facebook from 'expo-facebook';
+import { useQueryClient } from "react-query";
 
 const PersonalProfilePage = ({
   navigation,
@@ -44,7 +45,8 @@ const PersonalProfilePage = ({
   const [logoutModal, setLogoutModal] = React.useState(false);
   const [pickedImagePath, setPickedImagePath] = React.useState("");
   const options = ["移除目前的相片", "相機", "從相簿"];
-
+  const queryClient = useQueryClient();
+  
   useEffect(() => {
     if(!isLoggedIn){
       navigation.push('SettingPage')
@@ -161,8 +163,12 @@ const PersonalProfilePage = ({
           onCancel={() => setLogoutModal(!logoutModal)}
           onConfirm={() => {
             if(isFacebookLogIn){
-              Facebook.logOutAsync().then(() => dispatch(setFacebookLogout())).catch(err => console.log(err))
+              Facebook.logOutAsync().then(() => {
+                queryClient.clear()
+                dispatch(setFacebookLogout())
+              }).catch(err => console.log(err))
             }else{
+              queryClient.clear()
               dispatch(setUserLogout())
             }
             setLogoutModal(!logoutModal)
@@ -189,7 +195,7 @@ const PersonalProfilePage = ({
               <Button
                 title=""
                 image={images.icons.leftarrow_icon}
-                customStyle={{height: 20, width: 12,}}
+                buttonStyle={{height: 20, width: 12,}}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleBack()}
@@ -228,14 +234,11 @@ const PersonalProfilePage = ({
               <Button
                 title="變更頭像"
                 onPress={() => openActionsheet(!actionsheet)}
-                customStyle={{
+                buttonStyle={{
                   flexDirection: "row",
                   marginBottom: 40,
-                }}
-                imageSize={{
-                  width: 16,
-                  height: 16,
-                  marginRight: 7,
+                  width: 64,
+                  height: 19,
                 }}
                 type="text"
                 fontStyle={{

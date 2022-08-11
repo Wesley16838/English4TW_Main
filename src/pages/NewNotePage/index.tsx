@@ -8,7 +8,10 @@ import {
   Modal,
   Alert,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  TextInput
 } from "react-native";
 import Button from "components/Button/Button";
 import InputBox from "components/InputBox/InputBox";
@@ -38,6 +41,8 @@ const NewNotePage = () => {
     action: false
   });
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const firstInput = React.createRef<TextInput>()
+  const secondInput = React.createRef<TextInput>()
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const queryClient = useQueryClient();
   const route: RouteProp<{ params: { title: string, tags: [], id: number, content: string, type: string } }, 'params'> = useRoute();
@@ -61,14 +66,14 @@ const NewNotePage = () => {
       tag_ids: [...data.tags.map((tag:any) => tag?.id)]
     });
   }
-  const onErrorFetchNoteById = (data: any) => console.log('onErrorFetchNoteById')
+  const onErrorFetchNoteById = (data: any) => {}
   const { mutate: handleOngetNoteById } = getNoteById(onSuccessFetchNoteById, onErrorFetchNoteById)
   useEffect(() => {
     if(type === "edit")  handleOngetNoteById(id.toString())
   }, [])
 
-  const onSuccessFetchTags = (data: any) => console.log('onSuccessFetchTags')
-  const onErrorFetchTags = (data: any) => console.log('onErrorFetchTags')
+  const onSuccessFetchTags = (data: any) => {}
+  const onErrorFetchTags = (data: any) => {}
   const {data: tagsData, isLoading: tagLoading, error: tagError, isError: tagIsError} = getTag([], onSuccessFetchTags, onErrorFetchTags)
   let selectedTag = {
     id: "",
@@ -237,7 +242,6 @@ const NewNotePage = () => {
             "content-type" : "application/json"
           }
         })
-        console.log('data,', data)
         return data.data
       }catch(err){
 
@@ -450,187 +454,198 @@ const NewNotePage = () => {
         />
         <View style={[styles.sheet]}>
           <Animated.View style={[styles.popup, slideUp]}>
-            <View style={styles.sectionRow}>
-              <View style={styles.actionsheet}>
+            <View style={[styles.sectionRow, {justifyContent: type === "edit" ? "space-between" : "flex-end"}]}>
+              {
+                type === "edit" &&
                 <Button
                   title=""
                   image={images.icons.delete_icon}
+                  buttonStyle={{ height: 30, width: 30 }}
                   imageSize={{ height: 30, width: 30 }}
                   type=""
                   onPress={() => handleOnDeleteNote()}
                 />
-              </View>
+              }
               <Button
                 title=""
                 image={images.icons.close_icon}
-                customStyle={{}}
+                buttonStyle={{ height: 30, width: 30 }}
                 imageSize={{ height: 30, width: 30, marginRight: 0 }}
                 type=""
                 onPress={() => handleClose()}
               />
             </View>
-            <ScrollView contentContainerStyle={{flexGrow: 1}} contentInset={{bottom: 100}} showsVerticalScrollIndicator={false}>
-              <View style={{
-                 flexDirection: "column",
-                 alignItems: "center",
-              }}>
-                <InputBox
-                  OnChangeText={(str: string) => setNote({ ...note, title: str })}
-                  customStyle={{
-                  width: DEVICE_WIDTH - 40,
-                  height: 40,
-                  marginBottom: Spacing.space_l,
-                  marginTop: 20
-                  }}
-                  placeHolder={"輸入標題"}
-                  placeHolderTextColor={Colors.primary_light}
-                  value={note.title}
-                  isDisabled={isLoading}
-                />
-                <TextArea
-                  OnChangeText={(str: string) => setNote({ ...note, content: str })}
-                  source={Images.icons.microCircle_icon}
-                  placeHolder={"輸入內容"}
-                  customStyle={{
-                    width: DEVICE_WIDTH - 40,
-                    height: 270,
-                    marginBottom: Spacing.space_l,
-                  }}
-                  placeHolderTextColor={Colors.primary_light}
-                  limit={1000} 
-                  value={note.content}  
-                  isDisabled={isLoading}
-                />
-                <View style={styles.sectionContainer}>
-                  <Button
-                    title="+"
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.container}>
+              <ScrollView contentContainerStyle={{flexGrow: 1}} contentInset={{bottom: 80}} showsVerticalScrollIndicator={false}>
+                <View style={{
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}>
+                  <InputBox
+                    OnChangeText={(str: string) => setNote({ ...note, title: str })}
                     customStyle={{
-                      width: 38,
-                      height: 24,
+                    width: DEVICE_WIDTH - 40,
+                    height: 40,
+                    marginBottom: Spacing.space_l,
+                    marginTop: 20
+                    }}
+                    placeHolder={"輸入標題"}
+                    placeHolderTextColor={Colors.primary_light}
+                    value={note.title}
+                    isDisabled={isLoading}
+                    onClick={() => {
+                      secondInput.current?.focus();
+                    }}
+                    ref={firstInput}
+                  />
+                  <TextArea
+                    OnChangeText={(str: string) => setNote({ ...note, content: str })}
+                    source={Images.icons.microCircle_icon}
+                    placeHolder={"輸入內容"}
+                    customStyle={{
+                      width: DEVICE_WIDTH - 40,
+                      height: 270,
+                      marginBottom: Spacing.space_l,
+                    }}
+                    placeHolderTextColor={Colors.primary_light}
+                    limit={1000} 
+                    value={note.content}  
+                    isDisabled={isLoading}
+                    ref={secondInput}
+                  />
+                  <View style={styles.sectionContainer}>
+                    <Button
+                      title="+"
+                      buttonStyle={{
+                        width: 38,
+                        height: 24,
+                        borderRadius: 25,
+                        marginRight: 5,
+                        marginBottom: 5,
+                      }}
+                      type="1"
+                      onPress={() => setAddModalVisible(true)}
+                      isDisabled={isLoading}
+                    />
+                    {tagsData &&
+                      tagsData.map((tag: any, index: React.Key | null | undefined) => {
+                        return (
+                          <Tag
+                            key={index}
+                            title={tag['tag_name']}
+                            onPressIn={()=>setTag({
+                              id: tag.id,
+                              name: tag.tag_name
+                            })}
+                            onPress={() => {
+                              if(note.tag_ids.includes(tag['id'])){
+                                if(type === "add") {
+                                  setNote({...note, tag_ids: note.tag_ids.filter(tagId => tagId !== parseInt(tag.id))})
+                                } else {
+                                  setNote({...note, tag_ids: note.tag_ids.filter(tagId => tagId !== parseInt(tag.id))})
+                                  handleOnDeleteNoteTag(tag['id'])
+                                }
+                              } else {
+                                if(type === "add") {
+                                  setNote({ ...note, tag_ids:[...note.tag_ids, parseInt(tag.id)]})
+                                } else {
+                                  setNote({ ...note, tag_ids:[...note.tag_ids, parseInt(tag.id)]})
+                                  handleOnAddNoteTag(tag['tag_name'])
+                                }
+                              }
+                            }}
+                            onLongPress={() => {
+                              setMainModalVisible({
+                                ...mainModalVisible,
+                                main: true,
+                                action: true
+                              })
+                            }}
+                            customStyle={{
+                              paddingHorizontal: 15,
+                              paddingVertical: 3,
+                              marginRight: 5,
+                              marginBottom: 5,
+                              height: 24,
+                            }}
+                            disable={isLoading}
+                            isChoosed={note.tag_ids.includes(tag['id'])}
+                          />
+                        );
+                      })}
+                  </View>
+                  <View style={{ paddingHorizontal: Spacing.space_l }}>
+                    <View style={styles.row}>
+                      <View style={styles.bullet}>
+                        <Text>{"\u2022" + " "}</Text>
+                      </View>
+                      <View style={styles.bulletText}>
+                        <Text
+                          style={styles.info}
+                        >
+                          你可以新增英文和中文到筆記裡,
+                          英文可以使用發音和單字查詢功能, 中文則無.
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.row}>
+                      <View style={styles.bullet}>
+                        <Text>{"\u2022" + " "}</Text>
+                      </View>
+                      <View style={styles.bulletText}>
+                        <Text
+                          style={styles.info}
+                        >
+                          為避免影響音擋播放功能,
+                          點擊播放鍵後開始20秒內將無法操作其他功能.
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.row}>
+                      <View style={styles.bullet}>
+                        <Text>{"\u2022" + " "}</Text>
+                      </View>
+                      <View style={styles.bulletText}>
+                        <Text
+                          style={styles.info}
+                        >
+                          若要改變音擋的播放段落, 將文章依需求段行即可
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.row}>
+                      <View style={styles.bullet}>
+                        <Text>{"\u2022" + " "}</Text>
+                      </View>
+                      <View style={styles.bulletText}>
+                        <Text
+                          style={styles.info}
+                        >
+                          長按標籤即可進行編輯/刪除
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <Button
+                    title="完成"
+                    buttonStyle={{
+                      width: 335,
+                      height: 50,
                       borderRadius: 25,
-                      marginRight: 5,
-                      marginBottom: 5,
+                      marginTop: 25,
+                    }}
+                    fontStyle={{
+                      ...Typography.base_bold
                     }}
                     type="1"
-                    onPress={() => setAddModalVisible(true)}
+                    onPress={() => handleOnSubmit()}
                     isDisabled={isLoading}
                   />
-                  {tagsData &&
-                    tagsData.map((tag: any, index: React.Key | null | undefined) => {
-                      return (
-                        <Tag
-                          key={index}
-                          title={tag['tag_name']}
-                          onPressIn={()=>setTag({
-                            id: tag.id,
-                            name: tag.tag_name
-                          })}
-                          onPress={() => {
-                            if(note.tag_ids.includes(tag['id'])){
-                              if(type === "add") {
-                                setNote({...note, tag_ids: note.tag_ids.filter(tagId => tagId !== parseInt(tag.id))})
-                              } else {
-                                setNote({...note, tag_ids: note.tag_ids.filter(tagId => tagId !== parseInt(tag.id))})
-                                handleOnDeleteNoteTag(tag['id'])
-                              }
-                            } else {
-                              if(type === "add") {
-                                setNote({ ...note, tag_ids:[...note.tag_ids, parseInt(tag.id)]})
-                              } else {
-                                setNote({ ...note, tag_ids:[...note.tag_ids, parseInt(tag.id)]})
-                                handleOnAddNoteTag(tag['tag_name'])
-                              }
-                            }
-                          }}
-                          onLongPress={() => {
-                            setMainModalVisible({
-                              ...mainModalVisible,
-                              main: true,
-                              action: true
-                            })
-                          }}
-                          customStyle={{
-                            paddingHorizontal: 15,
-                            paddingVertical: 3,
-                            marginRight: 5,
-                            marginBottom: 5,
-                            height: 24,
-                          }}
-                          disable={isLoading}
-                          isChoosed={note.tag_ids.includes(tag['id'])}
-                        />
-                      );
-                    })}
                 </View>
-                <View style={{ paddingHorizontal: Spacing.space_l }}>
-                  <View style={styles.row}>
-                    <View style={styles.bullet}>
-                      <Text>{"\u2022" + " "}</Text>
-                    </View>
-                    <View style={styles.bulletText}>
-                      <Text
-                        style={styles.info}
-                      >
-                        你可以新增英文和中文到筆記裡,
-                        英文可以使用發音和單字查詢功能, 中文則無.
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.row}>
-                    <View style={styles.bullet}>
-                      <Text>{"\u2022" + " "}</Text>
-                    </View>
-                    <View style={styles.bulletText}>
-                      <Text
-                        style={styles.info}
-                      >
-                        為避免影響音擋播放功能,
-                        點擊播放鍵後開始20秒內將無法操作其他功能.
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.row}>
-                    <View style={styles.bullet}>
-                      <Text>{"\u2022" + " "}</Text>
-                    </View>
-                    <View style={styles.bulletText}>
-                      <Text
-                        style={styles.info}
-                      >
-                        若要改變音擋的播放段落, 將文章依需求段行即可
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.row}>
-                    <View style={styles.bullet}>
-                      <Text>{"\u2022" + " "}</Text>
-                    </View>
-                    <View style={styles.bulletText}>
-                      <Text
-                        style={styles.info}
-                      >
-                        長按標籤即可進行編輯/刪除
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-                <Button
-                  title="完成"
-                  customStyle={{
-                    width: 335,
-                    height: 50,
-                    borderRadius: 25,
-                    marginTop: 25,
-                  }}
-                  fontStyle={{
-                    ...Typography.base_bold
-                  }}
-                  type="1"
-                  onPress={() => handleOnSubmit()}
-                  isDisabled={isLoading}
-                />
-              </View>
-            </ScrollView>
+              </ScrollView>
+            </KeyboardAvoidingView>
           </Animated.View>
         </View>
       </View>
@@ -640,12 +655,12 @@ const NewNotePage = () => {
 
 const styles = StyleSheet.create({
   bullet: {
+    
     width: 10,
   },
   bulletText: {},
   row: {
     flexDirection: "row",
-    alignItems: "center",
     marginBottom: 3,
   },
   container: {

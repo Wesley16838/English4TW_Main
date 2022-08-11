@@ -4,7 +4,7 @@ export default interface IButton {
     onPress: ()=>void;
     type: string;
     title?: string;
-    customStyle?: any;
+    buttonStyle?: any;
     image?: ImageSourcePropType;
     imageSize?:{
         width: number;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Colors, Spacing } from "styles";
 import IInputbox from "types/components/inputbox";
-const InputBox: React.FC<IInputbox> = ({
+const InputBox = forwardRef<TextInput, IInputbox>(({
   OnChangeText,
   customStyle,
   placeHolder,
@@ -19,8 +19,12 @@ const InputBox: React.FC<IInputbox> = ({
   value,
   title,
   key,
-  isDisabled
-}) => {
+  isDisabled,
+  onClick,
+  returnKeyType,
+}, ref) => {
+  const localRef = useRef(null);
+  const inputRef = ref || localRef;
   return (
     <View style={{ flexDirection: "column" }}>
       {title && <Text>{title}</Text>}
@@ -39,17 +43,24 @@ const InputBox: React.FC<IInputbox> = ({
             placeholderTextColor={placeHolderTextColor}
             value={value}
             autoCapitalize="none"
-            returnKeyType="next"
+            returnKeyType={returnKeyType || "next"}
             editable={!isDisabled}
             selectTextOnFocus={!isDisabled}
-            // onSubmitEditing={Keyboard.dismiss}
+            onSubmitEditing={() => { 
+              if(onClick) onClick();
+            }}
+            ref={inputRef}
+            secureTextEntry={title==="密碼"}
           />
         </View>
       </TouchableWithoutFeedback>
     </View>
   );
-};
+});
 const styles = StyleSheet.create({
+  container: {
+    
+  },
   inputBox: {
     textAlignVertical: "center",
     borderRadius: 20,

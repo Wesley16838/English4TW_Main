@@ -4,9 +4,14 @@ import DictionaryPage from "pages/DictionaryPage";
 import SavedWordPage from "pages/SavedWordPage";
 import WordDetailPage from "pages/WordDetailPage";
 import WordComparePage from "pages/WordComparePage";
+import { shallowEqual, useSelector } from "react-redux";
 const DictionaryStack = createStackNavigator();
 
 const DictionaryStackNavigator = () => {
+  const {isLoggedIn}: any = useSelector(
+    (state: any) => state.user,
+    shallowEqual
+  );
   return (
     <DictionaryStack.Navigator
       screenOptions={{
@@ -19,23 +24,24 @@ const DictionaryStackNavigator = () => {
         component={DictionaryPage}
         options={{ animationEnabled: false, gestureEnabled: false }}
       />
-      <DictionaryStack.Screen
+      {isLoggedIn && <DictionaryStack.Screen
         name={"SavedWordPage"}
         component={SavedWordPage}
         options={{ animationEnabled: false, gestureEnabled: false }}
-      />
-      <DictionaryStack.Screen
+      />}
+      
+      {isLoggedIn && <DictionaryStack.Screen
         name={"WordDetailPage"}
         component={WordDetailPage}
         options={{ animationEnabled: false, gestureEnabled: false }}
         initialParams={{ word: "" }}
-      />
-      <DictionaryStack.Screen
+      />}
+      {isLoggedIn && <DictionaryStack.Screen
         name={"WordComparePage"}
         component={WordComparePage}
         options={{ animationEnabled: false, gestureEnabled: false }}
         initialParams={{ first: "", second: "" }}
-      />
+      />}
     </DictionaryStack.Navigator>
   );
 };

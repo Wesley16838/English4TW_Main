@@ -6,6 +6,9 @@ import {
   Image,
   Text,
   TextStyle,
+  KeyboardAvoidingView,
+  Platform,
+  TextInput,
 } from "react-native";
 import { NavigationProp, ParamListBase, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import Button from "components/Button/Button";
@@ -21,7 +24,8 @@ const ResetPasswordPage = () => {
   const route: RouteProp<{ params: { title: string } }, 'params'> = useRoute();
   const { title } = route.params;
   const [step, setStep] = useState(1);
-
+  const firstInput = React.createRef<TextInput>()
+  const secondInput = React.createRef<TextInput>()
   const backdrop = {
     transform: [
       {
@@ -159,6 +163,7 @@ const ResetPasswordPage = () => {
             placeHolder={"輸入電子郵件帳號"}
             placeHolderTextColor={Colors.primary_light}
             value={""}
+            returnKeyType={"done"}
           />
         );
       case 2:
@@ -169,6 +174,7 @@ const ResetPasswordPage = () => {
             placeHolder={"請輸入驗證碼"}
             placeHolderTextColor={Colors.primary_light}
             value={""}
+            returnKeyType={"done"}
           />
         );
       case 3:
@@ -185,6 +191,10 @@ const ResetPasswordPage = () => {
               placeHolderTextColor={Colors.primary_light}
               value={""}
               title={"輸入新密碼"}
+              onClick={() => {
+                secondInput.current?.focus();
+              }}
+              ref={firstInput}
             />
             <InputBox
               OnChangeText={(str: string) => {}}
@@ -197,6 +207,8 @@ const ResetPasswordPage = () => {
               placeHolderTextColor={Colors.primary_light}
               value={""}
               title={"確認新密碼"}
+              ref={secondInput}
+              returnKeyType={"done"}
             />
           </>
         );
@@ -223,113 +235,117 @@ const ResetPasswordPage = () => {
         <Animated.View
           style={[StyleSheet.absoluteFill, styles.cover, backdrop]}
         />
-        <View style={[styles.sheet]}>
-          <Animated.View style={[styles.popup, slideUp]}>
-            <View style={styles.sectionRow}>
-              <View style={{ flex: 1, alignItems: "flex-start" }}>
-                {step !== 4 && (
+         <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.container}>
+          <View style={[styles.sheet]}>
+            <Animated.View style={[styles.popup, slideUp]}>
+              <View style={styles.sectionRow}>
+                <View style={{ flex: 1, alignItems: "flex-start" }}>
+                  {step !== 4 && (
+                    <Button
+                      title=""
+                      image={images.icons.leftarrow_icon}
+                      buttonStyle={{height: 20, width: 12}}
+                      imageSize={{ height: 20, width: 12, marginRight: 0 }}
+                      type=""
+                      onPress={() => handleBack()}
+                    />
+                  )}
+                </View>
+                <Text
+                  style={ Typography.pageTitle as TextStyle }
+                >
+                  {title}
+                </Text>
+                <View style={{ flex: 1, alignItems: "flex-end" }}>
                   <Button
                     title=""
-                    image={images.icons.leftarrow_icon}
-                    customStyle={{}}
-                    imageSize={{ height: 20, width: 12, marginRight: 0 }}
+                    image={images.icons.close_icon}
+                    buttonStyle={{height: 30, width: 30}}
+                    imageSize={{ height: 30, width: 30, marginRight: 0 }}
                     type=""
-                    onPress={() => handleBack()}
+                    onPress={() => handleClose()}
                   />
-                )}
+                </View>
               </View>
-              <Text
-                style={ Typography.pageTitle as TextStyle }
-              >
-                {title}
-              </Text>
-              <View style={{ flex: 1, alignItems: "flex-end" }}>
-                <Button
-                  title=""
-                  image={images.icons.close_icon}
-                  customStyle={{}}
-                  imageSize={{ height: 30, width: 30, marginRight: 0 }}
-                  type=""
-                  onPress={() => handleClose()}
-                />
-              </View>
-            </View>
-            <View style={styles.sectionContainer}>
-              <View style={{ alignItems: "center" }}>
-                {step === 4 && (
-                  <View
-                    style={{
-                      flex: 1,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      paddingBottom: 66,
-                    }}
-                  >
-                    <Image
-                      source={images.icons.success_icon}
-                      style={{ width: 205, height: 205, resizeMode: "contain" }}
-                    />
-                    <Text
-                      style={Typography.base_secondary}
+              <View style={styles.sectionContainer}>
+                <View style={{ alignItems: "center" }}>
+                  {step === 4 && (
+                    <View
+                      style={{
+                        flex: 1,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        paddingBottom: 66,
+                      }}
                     >
-                      密碼設定成功
-                    </Text>
-                  </View>
-                )}
-                {renderStepImage()}
-                {renderStepText()}
-                {renderInputSection()}
-                {(step === 1 || step === 2) && (
-                  <View
-                    style={{
-                      width: DEVICE_WIDTH - 40,
-                      justifyContent: "flex-end",
-                      flexDirection: "row",
-                    }}
-                  >
-                    <Button
-                      title={step === 1 ? "寄送確認碼" : "驗證"}
-                      onPress={() => {
-                        if (step === 1) {
-                        } else if (step === 2) {
-                        }
+                      <Image
+                        source={images.icons.success_icon}
+                        style={{ width: 205, height: 205, resizeMode: "contain" }}
+                      />
+                      <Text
+                        style={Typography.base_secondary}
+                      >
+                        密碼設定成功
+                      </Text>
+                    </View>
+                  )}
+                  {renderStepImage()}
+                  {renderStepText()}
+                  {renderInputSection()}
+                  {(step === 1 || step === 2) && (
+                    <View
+                      style={{
+                        width: DEVICE_WIDTH - 40,
+                        justifyContent: "flex-end",
+                        flexDirection: "row",
                       }}
-                      customStyle={{
-                        width: 115,
-                        height: 30,
-                        borderRadius: 16,
-                      }}
-                      type="1"
-                    />
-                  </View>
-                )}
+                    >
+                      <Button
+                        title={step === 1 ? "寄送確認碼" : "驗證"}
+                        onPress={() => {
+                          if (step === 1) {
+                          } else if (step === 2) {
+                          }
+                        }}
+                        buttonStyle={{
+                          width: 115,
+                          height: 30,
+                          borderRadius: 16,
+                        }}
+                        type="1"
+                      />
+                    </View>
+                  )}
+                </View>
               </View>
-            </View>
-            <Button
-              title={buttonText()}
-              onPress={() => {
-                if (step === 1) {
-                  setStep(2);
-                } else if (step === 2) {
-                  setStep(3);
-                } else if (step === 3) {
-                  setStep(4);
-                } else if (step === 4) {
-                  navigation.navigate("LoginPage");
-                }
-              }}
-              customStyle={{
-                width: DEVICE_WIDTH - 40,
-                height: 50,
-                borderRadius: 25,
-                position: "absolute",
-                bottom: 34,
-                left: 20,
-              }}
-              type="1"
-            />
-          </Animated.View>
-        </View>
+              <Button
+                title={buttonText()}
+                onPress={() => {
+                  if (step === 1) {
+                    setStep(2);
+                  } else if (step === 2) {
+                    setStep(3);
+                  } else if (step === 3) {
+                    setStep(4);
+                  } else if (step === 4) {
+                    navigation.navigate("LoginPage");
+                  }
+                }}
+                buttonStyle={{
+                  width: DEVICE_WIDTH - 40,
+                  height: 50,
+                  borderRadius: 25,
+                  position: "absolute",
+                  bottom: 34,
+                  left: 20,
+                }}
+                type="1"
+              />
+            </Animated.View>
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </>
   );

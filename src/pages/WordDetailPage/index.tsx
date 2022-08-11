@@ -150,7 +150,7 @@ const WordDetailPage = () => {
             <Text style={styles.wordName}>{word}</Text>
             <Button
               image={images.icons.volume_icon}
-              customStyle={{}}
+              buttonStyle={{ height: 30, width: 30}}
               imageSize={{ height: 30, width: 30, marginRight: 0 }}
               type=""
               onPress={() => handleOnPlay()}
@@ -371,7 +371,7 @@ const WordDetailPage = () => {
               <Button
                 title=""
                 image={images.icons.leftarrow_icon}
-                customStyle={{}}
+                buttonStyle={{height: 20, width: 12}}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleBack()}
@@ -379,7 +379,7 @@ const WordDetailPage = () => {
               <Button
                 title=""
                 image={images.icons.rightarrow_disable_icon}
-                customStyle={{}}
+                buttonStyle={{height: 20, width: 12}}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleNext()}
@@ -388,7 +388,7 @@ const WordDetailPage = () => {
             <Button
               title=""
               image={images.icons.search_icon}
-              customStyle={{}}
+              buttonStyle={{height: 30, width: 30}}
               imageSize={{ height: 30, width: 30, marginRight: 0 }}
               type=""
               onPress={() => handleOnSearch()}
@@ -407,7 +407,7 @@ const WordDetailPage = () => {
             <Button
               title="" 
               image={images.icons.share_icon}
-              customStyle={{}}
+              buttonStyle={{height: 30, width: 30}}
               imageSize={{ height: 30, width: 30, marginRight: 0 }}
               type=""
               onPress={() => handleOnShare()}
@@ -415,7 +415,7 @@ const WordDetailPage = () => {
             <Button
               title=""
               image={saved ? images.icons.favorited_icon : images.icons.saved_icon}
-              customStyle={{}}
+              buttonStyle={{height: 30, width: 30}}
               imageSize={{ height: 30, width: 30, marginRight: 0 }}
               type=""
               onPress={() => {
@@ -433,7 +433,7 @@ const WordDetailPage = () => {
               saved && <Button
               title=""
               image={saved?.pinned === 1 ? images.icons.push_pin_selected_icon : images.icons.push_pin_icon}
-              customStyle={{}}
+              buttonStyle={{height: 30, width: 30}}
               imageSize={{ height: 30, width: 30, marginRight: 0 }}
               type=""
               onPress={() => handleOnTogglePin(saved)}
@@ -442,7 +442,7 @@ const WordDetailPage = () => {
             <Button
               title=""
               image={images.icons.speed_secondary_icon}
-              customStyle={{}}
+              buttonStyle={{height: 30, width: 30}}
               imageSize={{ height: 30, width: 30, marginRight: 0 }}
               type=""
               onPress={() => handleOnChangeSpeed()}

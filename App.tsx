@@ -12,7 +12,7 @@ import Images from "./src/assets/images";
 import { Colors } from "styles"
 import Layout from "components/Layout";
 import { DEVICE_WIDTH } from "pages/SplashPage";
-import { RootSiblingParent } from 'react-native-root-siblings';
+
 
 const Tab = createBottomTabNavigator();
 
@@ -64,7 +64,7 @@ export default function App() {
   }
 
   return (
-    <RootSiblingParent>
+
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
           <Layout>
@@ -124,6 +124,6 @@ export default function App() {
           </Layout>
         </QueryClientProvider>
       </Provider>
-    </RootSiblingParent>
+
   );
 }

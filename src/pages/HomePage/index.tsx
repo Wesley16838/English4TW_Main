@@ -10,6 +10,9 @@ import {
   Alert,
   SafeAreaView,
   StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+  TextInput,
 } from "react-native";
 import ModalContainer from "components/Modal/Modal";
 import { useSelector, shallowEqual, useDispatch } from "react-redux";
@@ -42,6 +45,8 @@ const HomePage = () => {
     second: "",
   });
   const [modalVisible, setModalVisible] = useState(false);
+  const firstInput = React.createRef<TextInput>()
+  const secondInput = React.createRef<TextInput>()
   const navigation = useNavigation<StackNavigationProp<any>>();
   const dispatch: Dispatch<any> = useDispatch()
   const {isLoggedIn}: any = useSelector(
@@ -59,13 +64,15 @@ const HomePage = () => {
 
   const onSuccessFetchUserWords = (data: any) => {
     if(data==='Unauthorized'){
-      console.log('Unauthorized')
+
     } else{
-      console.log('onSuccessFetchSavedWords')
+
     }
   }
-  const onErrorFetchUserWords = (data: any) => console.log('onErrorFetchNotes')
-  const {data, isLoading} = getUserWords([], onSuccessFetchUserWords, onErrorFetchUserWords)
+
+  const onErrorFetchUserWords = (data: any) => {}
+
+  const {data, isLoading} = getUserWords([isLoggedIn], onSuccessFetchUserWords, onErrorFetchUserWords)
 
   const filterData = words.filter(word=> searchWord && word.indexOf(searchWord.toUpperCase()) === 0)
 
@@ -75,11 +82,25 @@ const HomePage = () => {
 
   const handleOnSearch = async () => {
     try{
-      const result = await AsyncStorage.getItem('@word_history')
-      navigation.push("WordDetailPage", {
-        word: searchWord,
-        history: result ? result : '[]'
-      });
+      if(isLoggedIn){
+        if(searchWord.length === 0) {
+          Toast.show('需輸入內容', {
+            duration: Toast.durations.SHORT,
+            shadow: false
+          });
+        } else {
+          const result = await AsyncStorage.getItem('@word_history')
+          navigation.push("WordDetailPage", {
+            word: searchWord,
+            history: result ? result : '[]'
+          });
+        }
+      }else{
+        Toast.show('請先登入', {
+          duration: Toast.durations.SHORT,
+          shadow: false
+        });
+      }
     }catch(err){
       console.log('err,', err)
     }
@@ -147,7 +168,8 @@ const HomePage = () => {
   const handleOnWordPlay = (str: string) => {
     Speech.speak(str);
   }
-  const userWord = isLoggedIn && data[levelOptions.indexOf(level)][Math.floor(Math.random() * 2)]
+
+  const userWord = (isLoggedIn && data!== undefined) && data[levelOptions.indexOf(level)][Math.floor(Math.random() * 2)]
 
   const reset = () => {
     if(!!sentence) setSentence("")
@@ -157,7 +179,9 @@ const HomePage = () => {
       second: "",
     });
   }
+
   const isFocused = useIsFocused();
+
   if(!isFocused) reset()
 
   return (
@@ -182,12 +206,15 @@ const HomePage = () => {
         />
       </Modal>
       <LinearGradientLayout>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.container}>
         <SafeAreaView style={{marginTop: StatusBar.currentHeight}}>
           <SearchBox
             customStyle={{ width: DEVICE_WIDTH - 40, marginHorizontal: 20, marginVertical: 10 }}
             OnChange={(str: string) => handleOnChange(str)}
             OnClick={() => handleOnSearch()}
-            placeHolder={"點擊收尋字會或片語"}
+            placeHolder={"點擊收尋字彙或片語"}
             placeHolderTextColor={"rgba(196, 129, 72, 0.5)"}
             value={searchWord}
           />
@@ -236,6 +263,10 @@ const HomePage = () => {
                     placeHolder={"輸入內容"}
                     placeHolderTextColor={Colors.primary_light}
                     value={compareWords.first}
+                    onClick={() => {
+                      secondInput.current?.focus();
+                    }}
+                    ref={firstInput}
                   />
                   <Text
                     style={{
@@ -263,11 +294,13 @@ const HomePage = () => {
                     placeHolder={"輸入內容"}
                     placeHolderTextColor={Colors.primary_light}
                     value={compareWords.second}
+                    ref={secondInput}
+                    returnKeyType={"done"}
                   />
                   <Button
                     title="比較"
                     onPress={() => handleOnCompare()}
-                    customStyle={{
+                    buttonStyle={{
                       width: 72,
                       height: 30,
                       borderRadius: 16,
@@ -286,20 +319,20 @@ const HomePage = () => {
                   <Text style={Typography.base_bold}>推薦字彙</Text>
                 </View>
                 <Card
-                        title={dailyword}
-                        OnClick={() => handleOnwordDetailPage(dailyword)}
-                        customStyle={{ width: DEVICE_WIDTH - 40 }}
-                        buttons={[
-                          {
-                            name: 'volumn',
-                            path: Images.icons.volume_icon,
-                            onClick: () => handleOnWordPlay(dailyword)
-                          },
-                        ]}
-                      />
+                  title={dailyword}
+                  OnClick={() => handleOnwordDetailPage(dailyword)}
+                  customStyle={{ width: DEVICE_WIDTH - 40 }}
+                  buttons={[
+                    {
+                      name: 'volumn',
+                      path: Images.icons.volume_icon,
+                      onClick: () => handleOnWordPlay(dailyword)
+                    },
+                  ]}
+                />
               </View>
               {
-                isLoggedIn &&
+                (isLoggedIn && data!== undefined) &&
                 <View style={[styles.section, {marginBottom: 75}]}>
                   <View style={styles.topicOther}>
                     <View style={{ flexDirection: "row" }}>
@@ -343,12 +376,16 @@ const HomePage = () => {
             <WordList data={filterData}/>
           }
         </SafeAreaView>
+        </KeyboardAvoidingView>
       </LinearGradientLayout>
     </>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   section: {
     width: "100%",
     flexDirection: "column",

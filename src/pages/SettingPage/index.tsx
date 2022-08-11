@@ -87,17 +87,12 @@ const SettingPage = ({
             <Button
               title="登入"
               onPress={() => navigation.push("LoginPage")}
-              customStyle={{
+              buttonStyle={{
                 width: 150,
                 height: 36,
                 borderRadius: 20,
                 flexDirection: "row",
                 marginBottom: 44,
-              }}
-              imageSize={{
-                width: 16,
-                height: 16,
-                marginRight: 7,
               }}
               type="2"
             />

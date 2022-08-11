@@ -9,6 +9,8 @@ import {
   View,
   Text
 } from "react-native";
+import Toast from "react-native-root-toast";
+import { shallowEqual, useSelector } from "react-redux";
 import { Colors, Spacing, Typography } from "styles";
 import IWordList from "types/components/wordlist";
 
@@ -38,14 +40,25 @@ const WordList: React.FC<IWordList> = ({
   data,
 }) => {
   const navigation = useNavigation<StackNavigationProp<any>>();
-
+  const {isLoggedIn}: any = useSelector(
+    (state: any) => state.user,
+    shallowEqual
+  );
   const onItemPress = async (word: string) => {
-    const result = await AsyncStorage.getItem('@word_history')
-    navigation.push("WordDetailPage", {
-      word,
-      history: result ? result : '[]'
-    });
+    if(isLoggedIn){
+      const result = await AsyncStorage.getItem('@word_history')
+      navigation.push("WordDetailPage", {
+        word,
+        history: result ? result : '[]'
+      });
+    } else {
+      Toast.show('請先登入', {
+        duration: Toast.durations.SHORT,
+        shadow: false
+      });
+    }
   }
+    
   return (
     <FlatList
       contentContainerStyle={{

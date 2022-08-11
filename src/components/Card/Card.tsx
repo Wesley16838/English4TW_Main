@@ -56,6 +56,7 @@ const Card: React.FC<ICard> = ({
           {detail && <Text style={styles.detail}>{detail}</Text>}
           <Button
             image={images.icons.rightarrow_icon_b}
+            buttonStyle={{ height: 20, width: 12}}
             imageSize={{ height: 20, width: 12, marginRight: 0 }}
             type=""
             onPress={() => OnClick(title)}

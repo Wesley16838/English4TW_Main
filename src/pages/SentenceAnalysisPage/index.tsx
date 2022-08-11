@@ -34,7 +34,6 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
         let token = null;
         const result = await authDeviceStorage.getItem("JWT_TOKEN");
         if(result) token = JSON.parse(result).token
-        console.log('sentence,', sentence)
         const res_analysis: any = await api.post(`api/analyze`, {"ori_sentence":sentence},{ 
           headers: {
             "Authorization" : `Bearer ${token}`,
@@ -178,6 +177,7 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
               <Button
                 title=""
                 image={Images.icons.leftarrow_icon}
+                buttonStyle={{height: 20, width: 12}}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleBack()}
@@ -185,6 +185,7 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
               <Button
                 title=""
                 image={Images.icons.rightarrow_disable_icon}
+                buttonStyle={{height: 20, width: 12}}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleNext()}
@@ -193,6 +194,7 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
             <Button
               title=""
               image={Images.icons.close_icon}
+              buttonStyle={{height: 30, width: 30}}
               imageSize={{ height: 30, width: 30, marginRight: 0 }}
               type=""
               onPress={() => handleClose()}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -22,7 +22,7 @@ export type Props = {
   value: string;
   isDisabled?: boolean;
 };
-const TextArea: React.FC<Props> = ({
+const TextArea = forwardRef<TextInput, Props>(({
   OnChangeText,
   OnClick,
   customStyle,
@@ -33,9 +33,10 @@ const TextArea: React.FC<Props> = ({
   isDisabled,
   button,
   buttonStyle
-}) => {
+}, ref) => {
   const [textNumber, setTextNumber] = React.useState(0);
-
+  const localRef = useRef(null);
+  const inputRef = ref || localRef;
   const handleOnSubmit = () => {
     if(OnClick) OnClick()
   };
@@ -43,7 +44,7 @@ const TextArea: React.FC<Props> = ({
   return (
     <View style={[styles.textAreaSection, customStyle]}>
       <TextInput
-        // returnKeyType="done"
+        returnKeyType="done"
         blurOnSubmit={true}
         multiline={true}
         textAlignVertical="top"
@@ -60,7 +61,6 @@ const TextArea: React.FC<Props> = ({
           setTextNumber(str.length)
           if(OnChangeText) OnChangeText(str)
         }}
-        returnKeyType='none'
         onSubmitEditing={() => handleOnSubmit()}
         underlineColorAndroid="transparent"
         placeholderTextColor={placeHolderTextColor}
@@ -69,6 +69,7 @@ const TextArea: React.FC<Props> = ({
         autoCorrect={false}
         editable={!isDisabled}
         selectTextOnFocus={!isDisabled}
+        ref={inputRef}
       />
       <View style={styles.textAreaBottom}>
         <Text style={styles.textAreaText}>
@@ -77,7 +78,7 @@ const TextArea: React.FC<Props> = ({
       </View>
     </View>
   );
-};
+});
 const styles = StyleSheet.create({
   textAreaSection: {
     height: 150,

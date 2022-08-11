@@ -76,12 +76,12 @@ const SavedWordPage = ({ navigation }: { navigation: any }) => {
   const onSuccessFetchSavedWords = (data: any) => {
     if(data==='Unauthorized'){
 
-    } else{
-      console.log('onSuccessFetchSavedWords')
+    } else {
+
     }
     
   }
-  const onErrorFetchSavedWords = (data: any) => console.log('onErrorFetchNotes')
+  const onErrorFetchSavedWords = (data: any) => {}
   const {data, isLoading, error, isError, refetch} = getSavedWords([], onSuccessFetchSavedWords, onErrorFetchSavedWords,{
     refetchOnMount: true,
     refetchOnWindowFocus: true,
@@ -214,7 +214,6 @@ const SavedWordPage = ({ navigation }: { navigation: any }) => {
           <View
             style={{
               flexDirection: "row",
-              alignItems: "center",
               paddingHorizontal: 20
             }}
           >
@@ -224,7 +223,7 @@ const SavedWordPage = ({ navigation }: { navigation: any }) => {
               <Button
                 title=""
                 image={images.icons.leftarrow_icon}
-                customStyle={{}}
+                buttonStyle={{height: 20, width: 12}}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleBack()}

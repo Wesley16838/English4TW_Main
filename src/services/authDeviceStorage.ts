@@ -6,7 +6,7 @@ const authDeviceStorage = {
           await SecureStore.setItemAsync(key, value);
         } catch (e: unknown) {
             if(e instanceof Error){
-                console.log('Add SecoreStorage Error: ' + e.message);
+                console.log('Add authDeviceStorage Error: ' + e.message);
             }
         }
     },
@@ -15,7 +15,7 @@ const authDeviceStorage = {
           await SecureStore.deleteItemAsync(key);
         } catch (e: unknown) {
             if(e instanceof Error){
-                console.log('Remove SecoreStorage Error: ' + e.message);
+                console.log('Remove authDeviceStorage Error: ' + e.message);
             }
         }
     },
@@ -25,7 +25,7 @@ const authDeviceStorage = {
           return res;
         } catch (e: unknown) {
             if(e instanceof Error){
-                console.log('Get SecoreStorage Error: ' + e.message);
+                console.log('Get authDeviceStorage Error: ' + e.message);
             }
         }
     },

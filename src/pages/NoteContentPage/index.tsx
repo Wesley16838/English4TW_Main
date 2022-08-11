@@ -318,7 +318,7 @@ const NoteContentPage = () => {
               <Button
                 title=""
                 image={images.icons.leftarrow_icon}
-                customStyle={{}}
+                buttonStyle={{height: 20, width: 12}}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleBack()}
@@ -411,17 +411,19 @@ const NoteContentPage = () => {
           {
             isDisable ? <ActivityIndicator size="large" /> : 
             <>
-              {/* <View style={styles.noteContainer}>
+              <View style={styles.noteContainer}>
                 {
                   contentArr.map((note: any, index: any) => {
                     return(
-                      <Text key={note}>
-                        {note} <Text style={{...Typography.base_primary}} onPress={() => console.log('test')}> &#60; 看例句 &#62;</Text>
-                      </Text>
+                      <View style={{marginTop: index !== 0 ? 20 : 0}}>
+                        <Text key={note} style={Typography.base}>
+                          {note}
+                        </Text>
+                      </View>
                     )
                   })
                 }
-              </View> */}
+              </View>
               <View style={styles.sectionContainer}>
                 {
                   noteContent.tags.map((tag: { [x: string]: string; }) => {

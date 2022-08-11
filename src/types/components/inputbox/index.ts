@@ -9,4 +9,7 @@ export default interface IInputbox {
     title?: string;
     key?: string;
     isDisabled?:boolean;
+    onClick?: ()=> void;
+    returnKeyType?: any;
+    ref?: any
   };

@@ -71,7 +71,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
     queryClient.setQueryData('tagsData', data);
     setTagsData(data)
   }
-  const onErrorFetchTags = (data: any) => console.log('onErrorFetchTags')
+  const onErrorFetchTags = (data: any) => {}
   const {data: tagData, isLoading: tagLoading, error: tagError, isError: tagIsError, refetch: tagRefetch} = getTag([isLoggedIn], onSuccessFetchTags, onErrorFetchTags, {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
@@ -81,8 +81,8 @@ const NotePage = ({ navigation }: { navigation: any }) => {
     queryClient.setQueryData('notesData', data);
     setNotes(data);
   }
-  const onErrorFetchNotes = (data: any) => console.log('onErrorFetchNotes')
-  const {data: noteData, isLoading: noteLoading, error: noteError, isError: noteIsError, refetch: noteRefetch} = getAllNotes([isLoggedIn], onSuccessFetchNotes, onErrorFetchNotes,{
+  const onErrorFetchNotes = (data: any) => {}
+  const {data: noteData, isLoading: noteLoading, error: noteError, isError: noteIsError, refetch: noteRefetch, isSuccess: noteIsSuccess} = getAllNotes([isLoggedIn], onSuccessFetchNotes, onErrorFetchNotes,{
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   })
@@ -149,7 +149,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
           <Button
             title="新增筆記"
             onPress={handleOnAddNote}
-            customStyle={{
+            buttonStyle={{
               width: 150,
               height: 40,
               borderRadius: 20,
@@ -163,89 +163,89 @@ const NotePage = ({ navigation }: { navigation: any }) => {
             }}
             type="2"
             image={images.icons.add_icon}
-            isDisabled={noteData === 'Unauthorized' && tagData === 'Unauthorized'}
+            isDisabled={!isLoggedIn}
           />
           {
-            noteLoading && tagLoading ? <ActivityIndicator size="large" /> : 
-            <>
-              {
-                (tagData !== undefined && tagData !== 'Unauthorized') && 
-                <View style={styles.sectionRow}>
+            isLoggedIn ? 
+              noteLoading && tagLoading ? <ActivityIndicator size="large" /> : 
+                <>
                   {
-                    tagsData.map((tag:any, index: React.Key | null | undefined) => {
-                      return (
-                        <Tag
-                          key={index}
-                          title={tag['tag_name']}
-                          onPress={()=>handleOnFilter()}
-                          customStyle={{
-                            paddingHorizontal: 15,
-                            paddingVertical: 3,
-                            marginRight: 5,
-                            marginBottom: 5,
-                            height: 24,
-                          }}
-                          disable={false}
-                          onPressIn={() => {
-                            if(tags.includes(tag['id'])){
-                              setTags(tags.filter((item: number) => item!== tag['id']))
-                            } else {
-                              setTags([...tags, tag['id']])
-                            }
-                          }}
-                          isChoosed = {tags.includes(tag['id'])}
-                        />
-                      );
-                    })
+                    (tagData!=="Unauthorized" && tagData !== undefined) && 
+                    <View style={styles.sectionRow}>
+                      {
+                        tagsData.map((tag:any, index: React.Key | null | undefined) => {
+                          return (
+                            <Tag
+                              key={index}
+                              title={tag['tag_name']}
+                              onPress={()=>handleOnFilter()}
+                              customStyle={{
+                                paddingHorizontal: 15,
+                                paddingVertical: 3,
+                                marginRight: 5,
+                                marginBottom: 5,
+                                height: 24,
+                              }}
+                              disable={false}
+                              onPressIn={() => {
+                                if(tags.includes(tag['id'])){
+                                  setTags(tags.filter((item: number) => item!== tag['id']))
+                                } else {
+                                  setTags([...tags, tag['id']])
+                                }
+                              }}
+                              isChoosed = {tags.includes(tag['id'])}
+                            />
+                          );
+                        })
+                      }
+                    </View>
                   }
-                </View>
-              }
-              {
-                (noteData !== 'Unauthorized' && noteData !== undefined) ? 
-                (noteData.length === 0) ? 
-                  <View
-                    style={{
-                      flex: 1,
-                      paddingBottom: 83,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Image
-                      style={styles.imagenotestyle}
-                      source={images.icons.note_icon}
+                  {
+                    noteIsSuccess && noteData.length === 0 ? 
+                    <View
+                      style={{
+                        flex: 1,
+                        paddingBottom: 83,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Image
+                        style={styles.imagenotestyle}
+                        source={images.icons.note_icon}
+                      />
+                      <Text style={{ color: Colors.gray_4 }}>尚未新增筆記</Text>
+                    </View>
+                    :
+                    <FlatList
+                      contentContainerStyle={{
+                        flexGrow: 1,
+                      }}
+                      showsVerticalScrollIndicator={false}
+                      data={notes}
+                      renderItem={({ item, index }) => (
+                        <NoteItem key={index} word={item.title} index={index + 1} id={item.id} />
+                      )}
+                      keyExtractor={(item, index) => index.toString()}
                     />
-                    <Text style={{ color: Colors.gray_4 }}>尚未新增筆記</Text>
-                  </View>
-                  :
-                  <FlatList
-                    contentContainerStyle={{
-                      flexGrow: 1,
-                    }}
-                    showsVerticalScrollIndicator={false}
-                    data={notes}
-                    renderItem={({ item, index }) => (
-                      <NoteItem key={index} word={item.title} index={index + 1} id={item.id} />
-                    )}
-                    keyExtractor={(item, index) => index.toString()}
-                  />
-                : 
+                  }
+                </>
+              :
                 <View
-                    style={{
-                      flex: 1,
-                      paddingBottom: 83,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Image
-                      style={styles.imagenotestyle}
-                      source={images.icons.note_icon}
-                    />
-                    <Text style={{ color: Colors.gray_4 }}>尚未登入</Text>
-                  </View>
-              }
-            </>
+                  style={{
+                    flex: 1,
+                    paddingBottom: 83,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Image
+                    style={styles.imagenotestyle}
+                    source={images.icons.note_icon}
+                  />
+                  <Text style={{ color: Colors.gray_4 }}>尚未登入</Text>
+                </View>
           }
         </SafeAreaView>
       </LinearGradientLayout>

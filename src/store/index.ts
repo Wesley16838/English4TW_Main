@@ -7,7 +7,13 @@ import rootSaga from "sagas/index";
 
 const sagaMiddleware = createSagaMiddleware();
 
-const store = configureStore({reducer, middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat([sagaMiddleware, logger])}); 
+const store = configureStore({
+    reducer, 
+    middleware: (getDefaultMiddleware) => 
+        getDefaultMiddleware({
+            serializableCheck: false,
+        }).concat([sagaMiddleware, logger])
+    }); 
 
 sagaMiddleware.run(rootSaga);
 export default store;

@@ -35,18 +35,20 @@ export const getSavedWords = (keys: any[], onSuccess: (data: any) => void, onErr
 
 export const fetchUserWords = async() => {
     try{
-        console.log('fetchUserWords!!!')
         const userInfo = await authDeviceStorage.getItem("JWT_TOKEN");
         const token = userInfo && JSON.parse(userInfo).token
+        
         if(!token) throw new Error('Unauthorized')
         const result = await api.get("api/loginFetch", { headers: {"Authorization" : `Bearer ${token}`} })
+       
         if(result.data.message === 'Unauthorized') throw new Error('Unauthorized')
         const userWord = result.data.data.today_words.map((word:string[]) => {
             return word.map((str:string) => {
                 return result.data.data.today_defs[str]
             })
         })
-        return result.data.data.words
+
+        return userWord
     }catch (e: unknown) {
         if(e instanceof Error){
             return e.message
@@ -55,7 +57,7 @@ export const fetchUserWords = async() => {
 }
 
 export const getUserWords = (keys: any[], onSuccess: (data: any) => void, onError: (data: any) => void, parameters?: any) => {
-    return useQuery('user_words', fetchUserWords, {
+    return useQuery(['user_words', ...keys], fetchUserWords, {
         onSuccess,
         onError,
         refetchOnMount: parameters?.refetchOnMount || false,

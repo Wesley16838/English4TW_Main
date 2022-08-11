@@ -70,7 +70,7 @@ export const getButtonStyle = (type: string, status: any, isDisabled: boolean) =
 const Button: React.FC<IButton> = ({
   title,
   onPress,
-  customStyle,
+  buttonStyle,
   type,
   image,
   imageSize,
@@ -91,7 +91,7 @@ const Button: React.FC<IButton> = ({
       onPressOut={() => setStatus({...status, hover: false })}
       disabled={isDisabled}
       hitSlop={10}
-      style={[getButtonStyle(type, status, isDisabled),customStyle]}
+      style={[getButtonStyle(type, status, isDisabled), buttonStyle]}
     >
       <View
         style={styles.button}

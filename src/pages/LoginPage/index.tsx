@@ -8,6 +8,9 @@ import {
   Text,
   ScrollView,
   Alert,
+  Platform,
+  KeyboardAvoidingView,
+  TextInput,
 } from "react-native";
 import Button from "components/Button/Button";
 import InputBox from "components/InputBox/InputBox";
@@ -20,16 +23,22 @@ import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { Dispatch } from "redux";
 import { Colors, Spacing, Typography } from "styles";
 import * as Facebook from 'expo-facebook';
+import { first } from "lodash";
 
 const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
   const dispatch: Dispatch<any> = useDispatch();
+  const firstInput = React.createRef<TextInput>()
+  const secondInput = React.createRef<TextInput>()
   const [animation, setAnimation] = React.useState(new Animated.Value(0));
   const [account, setAccount] = useState({
     email: "",
     password: "",
   });
   const [checked, onCheck] = useState(false);
-
+  const { error }: any = useSelector(
+    (state: any) => state.user,
+    shallowEqual
+  );
   const handleOnFacebookLogin = async() => {
     try {
       await Facebook.initializeAsync({
@@ -55,20 +64,22 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
       dispatch(setFacebookLoginFail(message))
     }
   };
+
   const handleOnLogin = async () => {
     try {
       dispatch(setUserLogin({
         email: account.email,
         password: account.password
-      }));
+      }))
     } catch (err) {
-      console.error("err", err);
+      console.error("handleOnLogin err", err);
     }
   };
 
   const onCreateAccount = () => {
     navigation.push("CreateAccountPage");
   };
+
   const backdrop = {
     transform: [
       {
@@ -85,6 +96,7 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
       extrapolate: "clamp",
     }),
   };
+
   React.useEffect(() => {
     Animated.timing(animation, {
       toValue: 1,
@@ -92,15 +104,8 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
       useNativeDriver: true,
     }).start();
   }, []);
+
   const handleClose = () => {
-    Animated.timing(animation, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-    navigation.goBack();
-  };
-  const handleRemove = () => {
     Animated.timing(animation, {
       toValue: 0,
       duration: 300,
@@ -132,12 +137,16 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
             <View style={styles.sectionRow}>
               <Button
                 image={images.icons.close_icon}
+                buttonStyle={{ height: 30, width: 30}}
                 imageSize={{ height: 30, width: 30, marginRight: 0 }}
                 type=""
                 onPress={() => handleClose()}
               />
             </View>
-            <ScrollView contentContainerStyle={{flexGrow: 1}} contentInset={{bottom: 20}} showsVerticalScrollIndicator={false}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.container}>
+            <ScrollView contentContainerStyle={{flexGrow: 1}} contentInset={{bottom: 70}} showsVerticalScrollIndicator={false}>
               <View
                   style={styles.sectionContainer}
                 >
@@ -160,7 +169,7 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
                 <Button
                   title="使用 Facebook 帳號登入"
                   image={images.icons.facebook_icon}
-                  customStyle={{
+                  buttonStyle={{
                     flexDirection: "row",
                     borderRadius: 25,
                     height: 50,
@@ -211,6 +220,10 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
                   placeHolderTextColor={Colors.primary_light}
                   value={account.email}
                   title={"電子信箱"}
+                  onClick={() => {
+                    secondInput.current?.focus();
+                  }}
+                  ref={firstInput}
                 />
                 <InputBox
                   OnChangeText={(str: string) =>
@@ -223,13 +236,23 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
                     width: DEVICE_WIDTH - 40,
                     height: 40,
                     marginTop: 6,
-                    marginBottom: 20,
+                    marginBottom: error ? 10 : 20,
                   }}
                   placeHolder={"需有大小寫字母加數字"}
                   placeHolderTextColor={Colors.primary_light}
                   value={account.password}
                   title={"密碼"}
+                  ref={secondInput}
+                  returnKeyType={'done'}
                 />
+                {error && <View 
+                  style={{
+                    justifyContent: "flex-end",
+                    width: DEVICE_WIDTH - 40,
+                    marginBottom: 20,
+                  }}>
+                    <Text style={Typography.error}>信箱或密碼不正確</Text>
+                </View>}
                 <View
                   style={{
                     flexDirection: "row",
@@ -263,7 +286,7 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
                 <Button
                   title="登入"
                   onPress={() => handleOnLogin()}
-                  customStyle={{
+                  buttonStyle={{
                     width: DEVICE_WIDTH - 40,
                     height: 50,
                     borderRadius: 25,
@@ -293,6 +316,7 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
                 </View>
               </View>
             </ScrollView>
+            </KeyboardAvoidingView>
           </Animated.View>
         </View>
       </View>

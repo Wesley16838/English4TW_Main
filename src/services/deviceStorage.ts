@@ -6,7 +6,7 @@ const deviceStorage = {
           await AsyncStorage.setItem(key, value);
         } catch (e: unknown) {
             if(e instanceof Error){
-                console.log('Set AsyncStorage Error: ' + e.message);
+                console.log('Set deviceStorage Error: ' + e.message);
             }
         }
     },
@@ -16,7 +16,7 @@ const deviceStorage = {
         return res !== null ? JSON.parse(res) : null
       } catch (e: unknown) {
           if(e instanceof Error){
-              console.log('Get AsyncStorage Error: ' + e.message);
+              console.log('Get deviceStorage Error: ' + e.message);
           }
       }
   }

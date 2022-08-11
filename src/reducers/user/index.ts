@@ -20,7 +20,7 @@ const user = (state: any = initialState, action: any): any => {
         ...state,
         loading: false,
         isLoggedIn: true,
-        users: action.users,
+        error: null,
       };
     case actionTypes.SET_FACEBOOK_LOGIN_SUCCESS:
       return {
@@ -51,7 +51,7 @@ const user = (state: any = initialState, action: any): any => {
         users: null,
         loading: false,
         isLoggedIn: false,
-        error: action.message,
+        error: null,
       };
       case actionTypes.SET_FACEBOOK_LOGOUT:
       return {

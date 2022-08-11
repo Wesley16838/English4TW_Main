@@ -39,7 +39,7 @@ const PrivacyPolicyPage = () => {
               <Button
                 title=""
                 image={images.icons.leftarrow_icon}
-                customStyle={{}}
+                buttonStyle={{height: 20, width: 12}}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleBack()}

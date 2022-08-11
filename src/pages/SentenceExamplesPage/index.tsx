@@ -216,7 +216,7 @@ const SentenceExamplesPage = () => {
                 <Button
                   title=""
                   image={Images.icons.leftarrow_icon}
-                  customStyle={{}}
+                  buttonStyle={{height: 20, width: 12}}
                   imageSize={{ height: 20, width: 12, marginRight: 0 }}
                   type=""
                   onPress={() => handleBack()}
@@ -224,7 +224,7 @@ const SentenceExamplesPage = () => {
                 <Button
                   title=""
                   image={Images.icons.rightarrow_disable_icon}
-                  customStyle={{}}
+                  buttonStyle={{height: 20, width: 12}}
                   imageSize={{ height: 20, width: 12, marginRight: 0 }}
                   type=""
                   onPress={() => handleNext()}
@@ -233,7 +233,7 @@ const SentenceExamplesPage = () => {
               <Button
                 title=""
                 image={Images.icons.close_icon}
-                customStyle={{}}
+                buttonStyle={{height: 30, width: 30}}
                 imageSize={{ height: 30, width: 30, marginRight: 0 }}
                 type=""
                 onPress={() => handleClose()}

@@ -9,6 +9,9 @@ import {
   Alert,
   TextStyle,
   ScrollView,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
@@ -39,6 +42,10 @@ const CreateAccountPage = () => {
   const [step, setStep] = React.useState(1);
   const [actionsheet, openActionsheet] = React.useState(false);
   const [pickedImagePath, setPickedImagePath] = React.useState("");
+  const firstInput = React.createRef<TextInput>()
+  const secondInput = React.createRef<TextInput>()
+  const thirdInput = React.createRef<TextInput>()
+  const fourthInput = React.createRef<TextInput>()
   const options = ["移除目前的相片", "相機", "從相簿"];
   const onCreateAccountNext = async () => {
     try {
@@ -183,6 +190,7 @@ const CreateAccountPage = () => {
                 {step === 1 && (
                   <Button
                     image={images.icons.leftarrow_icon}
+                    buttonStyle={{ height: 20, width: 12 }}
                     imageSize={{ height: 20, width: 12, marginRight: 0 }}
                     type=""
                     onPress={() => handleBack()}
@@ -195,35 +203,42 @@ const CreateAccountPage = () => {
               <View style={{ flex: 1, alignItems: "flex-end" }}>
                 <Button
                   image={images.icons.close_icon}
+                  buttonStyle={{ height: 30, width: 30 }}
                   imageSize={{ height: 30, width: 30, marginRight: 0 }}
                   type=""
                   onPress={() => handleClose()}
                 />
               </View>
             </View>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{alignItems: "center"}}>
-              <View>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.container}>
+            <ScrollView showsVerticalScrollIndicator={false} contentInset={{bottom: 70}} contentContainerStyle={{alignItems: "center"}}>
+              <View style={{marginBottom: 20}}>
                 {step === 2 && (
-                  <View
-                    style={{
-                      flex: 1,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      paddingBottom: 66,
-                    }}
-                  >
-                    <Image
-                      source={images.icons.success_icon}
-                      style={{ width: 205, height: 205, resizeMode: "contain" }}
-                    />
-                    <Text
+                  <>
+                    <View
                       style={{
-                        ...Typography.base_secondary
+                        flex: 1,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        paddingHorizontal: 20
                       }}
                     >
-                      請至電子郵件收發帳戶認證信件, 方能完成註冊程序.
-                    </Text>
-                  </View>
+                      <Image
+                        source={images.icons.success_icon}
+                        style={{ width: 205, height: 205, resizeMode: "contain" }}
+                      />
+                      <Text
+                        style={{
+                          ...Typography.base_secondary
+                        }}
+                      >
+                        請至電子郵件收發帳戶認證信件, 方能完成註冊程序.
+                      </Text>
+                    </View>
+
+                  </>
                 )}
                 {step === 1 && (
                   <>
@@ -236,8 +251,7 @@ const CreateAccountPage = () => {
                         }
                         customStyle={{
                           height: 130,
-                          width: 130,
-                          
+                          width: 130, 
                           marginBottom: 30,
                           borderRadius: 65,
                           alignSelf: "center"
@@ -249,6 +263,7 @@ const CreateAccountPage = () => {
                           fontStyle={{
                             ...Typography.base_secondary,
                           }}
+                          buttonStyle={{ height: 19}}
                           title="變更頭像"
                           onPress={() => openActionsheet(!actionsheet)}
                         />
@@ -266,6 +281,10 @@ const CreateAccountPage = () => {
                       placeHolderTextColor={Colors.primary_light}
                       value={account.email}
                       title={"姓名"}
+                      ref={firstInput}
+                      onClick={() => {
+                        secondInput.current?.focus();
+                      }}
                     />
                     <InputBox
                       OnChangeText={(str: string) =>
@@ -279,6 +298,10 @@ const CreateAccountPage = () => {
                       placeHolderTextColor={Colors.primary_light}
                       value={account.email}
                       title={"電子信箱"}
+                      ref={secondInput}
+                      onClick={() => {
+                        thirdInput.current?.focus();
+                      }}
                     />
                     <InputBox
                       OnChangeText={(str: string) =>
@@ -292,6 +315,10 @@ const CreateAccountPage = () => {
                       placeHolderTextColor={Colors.primary_light}
                       value={account.email}
                       title={"密碼"}
+                      ref={thirdInput}
+                      onClick={() => {
+                        fourthInput.current?.focus();
+                      }}
                     />
                     <InputBox
                       OnChangeText={(str: string) =>
@@ -305,6 +332,8 @@ const CreateAccountPage = () => {
                       placeHolderTextColor={Colors.primary_light}
                       value={account.email}
                       title={"確認密碼"}
+                      ref={fourthInput}
+                      returnKeyType={"done"}
                     />
                     <View
                       style={{
@@ -328,7 +357,6 @@ const CreateAccountPage = () => {
                         title={"我已閱讀並同意English4Tw的隱私政策"}
                       />
                     </View>
-                    <View style={{flexGrow: 1}}/>
                   </>
                 )}
               </View>
@@ -341,11 +369,16 @@ const CreateAccountPage = () => {
                           navigation.navigate("LoginPage");
                         }
                   }
-                  customStyle={styles.button}
+                  buttonStyle={{
+                    width: DEVICE_WIDTH - 40,
+                    height: 50,
+                    borderRadius: 25,
+                  }}
                   type="1"
               />
               
             </ScrollView>
+            </KeyboardAvoidingView>
           </Animated.View>
         </View>
       </View>
@@ -393,11 +426,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginBottom: 20,
   },
-  button: {
-    width: DEVICE_WIDTH - 40,
-    height: 50,
-    borderRadius: 25,
-  }
 });
 
 export default CreateAccountPage;

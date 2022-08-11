@@ -45,7 +45,7 @@ const SubscribePage = ({
             <Button
               title=""
               image={images.icons.leftarrow_icon}
-              customStyle={{}}
+              buttonStyle={{height: 20, width: 12}}
               imageSize={{ height: 20, width: 12, marginRight: 0 }}
               type=""
               onPress={() => handleBack()}
@@ -199,7 +199,7 @@ const SubscribePage = ({
         </View>
         <Button
           title="確定"
-          customStyle={{
+          buttonStyle={{
             width: DEVICE_WIDTH - 40,
             height: 50,
             borderRadius: 25,
