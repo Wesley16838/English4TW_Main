@@ -16,61 +16,68 @@ import Button from "components/Button/Button";
 import InputBox from "components/InputBox/InputBox";
 import CheckBox from "components/Checkbox/Checkbox";
 import images from "assets/images";
-import { setFaceBookLogin, setFaceBookLoginSuccess, setUserLogin, setUserLoginFail } from "actions/user";
+import {
+  setFaceBookLogin,
+  setFaceBookLoginSuccess,
+  setUserLogin,
+  setUserLoginFail,
+} from "actions/user";
 import { DEVICE_WIDTH, DEVICE_HEIGHT } from "pages/SplashPage";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { Dispatch } from "redux";
 import { Colors, Spacing, Typography } from "styles";
-import * as Facebook from 'expo-facebook';
+import * as Facebook from "expo-facebook";
 import { first } from "lodash";
 
 const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
   const dispatch: Dispatch<any> = useDispatch();
-  const firstInput = React.createRef<TextInput>()
-  const secondInput = React.createRef<TextInput>()
+  const firstInput = React.createRef<TextInput>();
+  const secondInput = React.createRef<TextInput>();
   const [animation, setAnimation] = React.useState(new Animated.Value(0));
   const [account, setAccount] = useState({
     email: "",
     password: "",
   });
   const [checked, onCheck] = useState(false);
-  const { error }: any = useSelector(
-    (state: any) => state.user,
-    shallowEqual
-  );
-  const handleOnFacebookLogin = async() => {
+  const { error }: any = useSelector((state: any) => state.user, shallowEqual);
+  const handleOnFacebookLogin = async () => {
     try {
       await Facebook.initializeAsync({
-        appId: '456600219204886',
+        appId: "456600219204886",
       });
-      const data =
-        await Facebook.logInWithReadPermissionsAsync({
-          permissions: ['public_profile'],
-        });
-      const {type, token} = data as any
-      if (type === 'success') {
-        const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,picture`);
-        const user = await response.json()
-        dispatch(setFaceBookLogin({
-          user
-        }))
+      const data = await Facebook.logInWithReadPermissionsAsync({
+        permissions: ["public_profile"],
+      });
+      const { type, token } = data as any;
+      if (type === "success") {
+        const response = await fetch(
+          `https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,picture`
+        );
+        const user = await response.json();
+        dispatch(
+          setFaceBookLogin({
+            user,
+          })
+        );
         // const res = await api.post("api/auth",{ provider: "facebook", credential: user.id })
       } else {
         // type === 'cancel'
       }
     } catch ({ message }) {
       alert(`Facebook Login Error: ${message}`);
-      dispatch(setFacebookLoginFail(message))
+      dispatch(setFacebookLoginFail(message));
     }
   };
 
   const handleOnLogin = async () => {
     try {
-      dispatch(setUserLogin({
-        email: account.email,
-        password: account.password
-      }))
+      dispatch(
+        setUserLogin({
+          email: account.email,
+          password: account.password,
+        })
+      );
     } catch (err) {
       console.error("handleOnLogin err", err);
     }
@@ -119,7 +126,7 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
       {
         translateY: animation.interpolate({
           inputRange: [0.01, 1],
-          outputRange: [0, -.95 * DEVICE_HEIGHT],
+          outputRange: [0, -0.95 * DEVICE_HEIGHT],
           extrapolate: "clamp",
         }),
       },
@@ -127,29 +134,35 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
   };
 
   return (
-
-      <View style={styles.container}>
-        <Animated.View
-          style={[StyleSheet.absoluteFill, styles.cover, backdrop]}
-        />
-        <View style={[styles.sheet]}>
-          <Animated.View style={[styles.popup, slideUp]}>
-            <View style={styles.sectionRow}>
-              <Button
-                image={images.icons.close_icon}
-                buttonStyle={{ height: 30, width: 30}}
-                imageSize={{ height: 30, width: 30, marginRight: 0 }}
-                type=""
-                onPress={() => handleClose()}
-              />
-            </View>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.container}>
-            <ScrollView contentContainerStyle={{flexGrow: 1}} contentInset={{bottom: 70}} showsVerticalScrollIndicator={false}>
-              <View
-                  style={styles.sectionContainer}
-                >
+    <View style={styles.container}>
+      <Animated.View
+        style={[StyleSheet.absoluteFill, styles.cover, backdrop]}
+      />
+      <View style={[styles.sheet]}>
+        <Animated.View style={[styles.popup, slideUp]}>
+          <View style={styles.sectionRow}>
+            <Button
+              image={images.icons.close_icon}
+              buttonStyle={{ height: 30, width: 30 }}
+              imageSize={{ height: 30, width: 30, marginRight: 0 }}
+              type=""
+              onPress={() => handleClose()}
+            />
+          </View>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 85}
+            style={styles.container}
+          >
+            <ScrollView
+              contentInset={{ bottom: 100 }}
+              contentContainerStyle={{
+                flexGrow: 1,
+                paddingBottom: 40,
+              }}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.sectionContainer}>
                 <Image
                   source={images.icons.launch_icon}
                   style={{ width: 85, height: 85 }}
@@ -243,16 +256,19 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
                   value={account.password}
                   title={"密碼"}
                   ref={secondInput}
-                  returnKeyType={'done'}
+                  returnKeyType={"done"}
                 />
-                {error && <View 
-                  style={{
-                    justifyContent: "flex-end",
-                    width: DEVICE_WIDTH - 40,
-                    marginBottom: 20,
-                  }}>
+                {error && (
+                  <View
+                    style={{
+                      justifyContent: "flex-end",
+                      width: DEVICE_WIDTH - 40,
+                      marginBottom: 20,
+                    }}
+                  >
                     <Text style={Typography.error}>信箱或密碼不正確</Text>
-                </View>}
+                  </View>
+                )}
                 <View
                   style={{
                     flexDirection: "row",
@@ -316,10 +332,10 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
                 </View>
               </View>
             </ScrollView>
-            </KeyboardAvoidingView>
-          </Animated.View>
-        </View>
+          </KeyboardAvoidingView>
+        </Animated.View>
       </View>
+    </View>
   );
 };
 
@@ -336,7 +352,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: DEVICE_HEIGHT + 20,
     left: 0,
-    right: 0,    
+    right: 0,
   },
   popup: {
     height: DEVICE_HEIGHT,
@@ -344,7 +360,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 13,
     borderTopRightRadius: 13,
     paddingTop: 26,
-
   },
   sectionRow: {
     flexDirection: "row",
@@ -367,4 +382,3 @@ export default LoginPage;
 function setFacebookLoginFail(message: unknown): any {
   throw new Error("Function not implemented.");
 }
-

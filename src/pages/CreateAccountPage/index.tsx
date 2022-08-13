@@ -15,7 +15,13 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
-import { NavigationProp, ParamListBase, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import {
+  NavigationProp,
+  ParamListBase,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import Button from "components/Button/Button";
 import InputBox from "components/InputBox/InputBox";
 import CheckBox from "components/Checkbox/Checkbox";
@@ -23,12 +29,12 @@ import ProfileImage from "components/ProfileImage/ProfileImage";
 import ActionSheet from "components/ActionSheet/ActionSheet";
 import images from "assets/images";
 import { DEVICE_WIDTH, DEVICE_HEIGHT } from "pages/SplashPage";
-import api from "services/api"
+import api from "services/api";
 import { Colors, Spacing, Typography } from "styles";
 
 const CreateAccountPage = () => {
-  const navigation: NavigationProp<ParamListBase> = useNavigation();
-  const route: RouteProp<{ params: { title: string } }, 'params'> = useRoute();
+  const navigation = useNavigation();
+  const route: RouteProp<{ params: { title: string } }, "params"> = useRoute();
   const [animation, setAnimation] = React.useState(new Animated.Value(0));
   const { title } = route.params;
   const [account, setAccount] = React.useState({
@@ -42,10 +48,10 @@ const CreateAccountPage = () => {
   const [step, setStep] = React.useState(1);
   const [actionsheet, openActionsheet] = React.useState(false);
   const [pickedImagePath, setPickedImagePath] = React.useState("");
-  const firstInput = React.createRef<TextInput>()
-  const secondInput = React.createRef<TextInput>()
-  const thirdInput = React.createRef<TextInput>()
-  const fourthInput = React.createRef<TextInput>()
+  const firstInput = React.createRef<TextInput>();
+  const secondInput = React.createRef<TextInput>();
+  const thirdInput = React.createRef<TextInput>();
+  const fourthInput = React.createRef<TextInput>();
   const options = ["移除目前的相片", "相機", "從相簿"];
   const onCreateAccountNext = async () => {
     try {
@@ -104,7 +110,7 @@ const CreateAccountPage = () => {
       {
         translateY: animation.interpolate({
           inputRange: [0.01, 1],
-          outputRange: [0, -.93 * DEVICE_HEIGHT],
+          outputRange: [0, -0.93 * DEVICE_HEIGHT],
           extrapolate: "clamp",
         }),
       },
@@ -197,9 +203,7 @@ const CreateAccountPage = () => {
                   />
                 )}
               </View>
-              <Text style={ Typography.pageTitle as TextStyle }>
-                {title}
-              </Text>
+              <Text style={Typography.pageTitle as TextStyle}>{title}</Text>
               <View style={{ flex: 1, alignItems: "flex-end" }}>
                 <Button
                   image={images.icons.close_icon}
@@ -211,156 +215,168 @@ const CreateAccountPage = () => {
               </View>
             </View>
             <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.container}>
-            <ScrollView showsVerticalScrollIndicator={false} contentInset={{bottom: 70}} contentContainerStyle={{alignItems: "center"}}>
-              <View style={{marginBottom: 20}}>
-                {step === 2 && (
-                  <>
-                    <View
-                      style={{
-                        flex: 1,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        paddingHorizontal: 20
-                      }}
-                    >
-                      <Image
-                        source={images.icons.success_icon}
-                        style={{ width: 205, height: 205, resizeMode: "contain" }}
-                      />
-                      <Text
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 85}
+              style={styles.container}
+            >
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentInset={{ bottom: 100 }}
+                contentContainerStyle={{
+                  alignItems: "center",
+                  paddingBottom: Platform.OS !== "ios" ? 70 : 0,
+                }}
+              >
+                <View style={{ marginBottom: 20 }}>
+                  {step === 2 && (
+                    <>
+                      <View
                         style={{
-                          ...Typography.base_secondary
+                          flex: 1,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 20,
                         }}
                       >
-                        請至電子郵件收發帳戶認證信件, 方能完成註冊程序.
-                      </Text>
-                    </View>
-
-                  </>
-                )}
-                {step === 1 && (
-                  <>
-                    <View style={{marginVertical: 20,}}>
-                      <ProfileImage
-                        name={
-                          pickedImagePath !== ""
-                            ? pickedImagePath
-                            : images.icons.default_profileimage
-                        }
-                        customStyle={{
-                          height: 130,
-                          width: 130, 
-                          marginBottom: 30,
-                          borderRadius: 65,
-                          alignSelf: "center"
-                        }}
-                      />
-                      <View style={{alignSelf: 'center'}}>
-                        <Button
-                          type="text"
-                          fontStyle={{
+                        <Image
+                          source={images.icons.success_icon}
+                          style={{
+                            width: 205,
+                            height: 205,
+                            resizeMode: "contain",
+                          }}
+                        />
+                        <Text
+                          style={{
                             ...Typography.base_secondary,
                           }}
-                          buttonStyle={{ height: 19}}
-                          title="變更頭像"
-                          onPress={() => openActionsheet(!actionsheet)}
+                        >
+                          請至電子郵件收發帳戶認證信件, 方能完成註冊程序.
+                        </Text>
+                      </View>
+                    </>
+                  )}
+                  {step === 1 && (
+                    <>
+                      <View style={{ marginVertical: 20 }}>
+                        <ProfileImage
+                          name={
+                            pickedImagePath !== ""
+                              ? pickedImagePath
+                              : images.icons.default_profileimage
+                          }
+                          customStyle={{
+                            height: 130,
+                            width: 130,
+                            marginBottom: 30,
+                            borderRadius: 65,
+                            alignSelf: "center",
+                          }}
                         />
-                      </View>                   
-                    </View>
-                    <InputBox
-                      OnChangeText={(str: string) =>
-                        setAccount({
-                          ...account,
-                          fullname: str,
-                        })
-                      }
-                      customStyle={styles.inputSection}
-                      placeHolder={"例如：王小明"}
-                      placeHolderTextColor={Colors.primary_light}
-                      value={account.email}
-                      title={"姓名"}
-                      ref={firstInput}
-                      onClick={() => {
-                        secondInput.current?.focus();
-                      }}
-                    />
-                    <InputBox
-                      OnChangeText={(str: string) =>
-                        setAccount({
-                          ...account,
-                          email: str,
-                        })
-                      }
-                      customStyle={styles.inputSection}
-                      placeHolder={"例如：XXXXXX@gmail.com"}
-                      placeHolderTextColor={Colors.primary_light}
-                      value={account.email}
-                      title={"電子信箱"}
-                      ref={secondInput}
-                      onClick={() => {
-                        thirdInput.current?.focus();
-                      }}
-                    />
-                    <InputBox
-                      OnChangeText={(str: string) =>
-                        setAccount({
-                          ...account,
-                          password: str,
-                        })
-                      }
-                      customStyle={styles.inputSection}
-                      placeHolder={"需有大小寫字母加數字"}
-                      placeHolderTextColor={Colors.primary_light}
-                      value={account.email}
-                      title={"密碼"}
-                      ref={thirdInput}
-                      onClick={() => {
-                        fourthInput.current?.focus();
-                      }}
-                    />
-                    <InputBox
-                      OnChangeText={(str: string) =>
-                        setAccount({
-                          ...account,
-                          secondpassword: str,
-                        })
-                      }
-                      customStyle={styles.inputSection}
-                      placeHolder={"再一次輸入密碼"}
-                      placeHolderTextColor={Colors.primary_light}
-                      value={account.email}
-                      title={"確認密碼"}
-                      ref={fourthInput}
-                      returnKeyType={"done"}
-                    />
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignSelf: "flex-start",
-                      }}
-                    >
-                      <CheckBox
-                        checked={checked}
-                        OnClick={() =>
+                        <View style={{ alignSelf: "center" }}>
+                          <Button
+                            type="text"
+                            fontStyle={{
+                              ...Typography.base_secondary,
+                            }}
+                            buttonStyle={{ height: 19 }}
+                            title="變更頭像"
+                            onPress={() => openActionsheet(!actionsheet)}
+                          />
+                        </View>
+                      </View>
+                      <InputBox
+                        OnChangeText={(str: string) =>
                           setAccount({
                             ...account,
-                            tos: !account.tos,
+                            fullname: str,
                           })
                         }
-                        customStyle={{
-                          width: 20,
-                          height: 20,
+                        customStyle={styles.inputSection}
+                        placeHolder={"例如：王小明"}
+                        placeHolderTextColor={Colors.primary_light}
+                        value={account.email}
+                        title={"姓名"}
+                        ref={firstInput}
+                        onClick={() => {
+                          secondInput.current?.focus();
                         }}
-                        title={"我已閱讀並同意English4Tw的隱私政策"}
                       />
-                    </View>
-                  </>
-                )}
-              </View>
-              <Button
+                      <InputBox
+                        OnChangeText={(str: string) =>
+                          setAccount({
+                            ...account,
+                            email: str,
+                          })
+                        }
+                        customStyle={styles.inputSection}
+                        placeHolder={"例如：XXXXXX@gmail.com"}
+                        placeHolderTextColor={Colors.primary_light}
+                        value={account.email}
+                        title={"電子信箱"}
+                        ref={secondInput}
+                        onClick={() => {
+                          thirdInput.current?.focus();
+                        }}
+                      />
+                      <InputBox
+                        OnChangeText={(str: string) =>
+                          setAccount({
+                            ...account,
+                            password: str,
+                          })
+                        }
+                        customStyle={styles.inputSection}
+                        placeHolder={"需有大小寫字母加數字"}
+                        placeHolderTextColor={Colors.primary_light}
+                        value={account.email}
+                        title={"密碼"}
+                        ref={thirdInput}
+                        onClick={() => {
+                          fourthInput.current?.focus();
+                        }}
+                      />
+                      <InputBox
+                        OnChangeText={(str: string) =>
+                          setAccount({
+                            ...account,
+                            secondpassword: str,
+                          })
+                        }
+                        customStyle={styles.inputSection}
+                        placeHolder={"再一次輸入密碼"}
+                        placeHolderTextColor={Colors.primary_light}
+                        value={account.email}
+                        title={"確認密碼"}
+                        ref={fourthInput}
+                        returnKeyType={"done"}
+                      />
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignSelf: "flex-start",
+                        }}
+                      >
+                        <CheckBox
+                          checked={checked}
+                          OnClick={() =>
+                            setAccount({
+                              ...account,
+                              tos: !account.tos,
+                            })
+                          }
+                          customStyle={{
+                            width: 20,
+                            height: 20,
+                          }}
+                          title={"我已閱讀並同意English4Tw的隱私政策"}
+                        />
+                      </View>
+                    </>
+                  )}
+                </View>
+                <Button
                   title={step === 1 ? "下一步" : "完成"}
                   onPress={
                     step === 1
@@ -375,9 +391,8 @@ const CreateAccountPage = () => {
                     borderRadius: 25,
                   }}
                   type="1"
-              />
-              
-            </ScrollView>
+                />
+              </ScrollView>
             </KeyboardAvoidingView>
           </Animated.View>
         </View>

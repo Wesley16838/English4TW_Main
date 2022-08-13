@@ -10,7 +10,13 @@ import {
   Platform,
   TextInput,
 } from "react-native";
-import { NavigationProp, ParamListBase, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import {
+  NavigationProp,
+  ParamListBase,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import Button from "components/Button/Button";
 import InputBox from "components/InputBox/InputBox";
 import images from "assets/images";
@@ -20,12 +26,12 @@ import { Colors, Typography } from "styles";
 // TodoList: input onchange function
 const ResetPasswordPage = () => {
   const [animation, setAnimation] = useState(new Animated.Value(0));
-  const navigation: NavigationProp<ParamListBase> = useNavigation();
-  const route: RouteProp<{ params: { title: string } }, 'params'> = useRoute();
+  const navigation = useNavigation();
+  const route: RouteProp<{ params: { title: string } }, "params"> = useRoute();
   const { title } = route.params;
   const [step, setStep] = useState(1);
-  const firstInput = React.createRef<TextInput>()
-  const secondInput = React.createRef<TextInput>()
+  const firstInput = React.createRef<TextInput>();
+  const secondInput = React.createRef<TextInput>();
   const backdrop = {
     transform: [
       {
@@ -130,18 +136,14 @@ const ResetPasswordPage = () => {
     switch (step) {
       case 1:
         return (
-          <Text
-            style={styles.content}
-          >
+          <Text style={styles.content}>
             如需變更密碼, 請輸入之前設定的電子郵件帳號.
             系統將寄送認證碼至該郵件帳號內.
           </Text>
         );
       case 2:
         return (
-          <Text
-            style={styles.content}
-          >
+          <Text style={styles.content}>
             請貼上郵件內含的認證碼, 或直接開啟郵件內連結進行操作.
           </Text>
         );
@@ -159,7 +161,7 @@ const ResetPasswordPage = () => {
         return (
           <InputBox
             OnChangeText={(str: string) => {}}
-            customStyle={{...styles.input, marginBottom: 10}}
+            customStyle={{ ...styles.input, marginBottom: 10 }}
             placeHolder={"輸入電子郵件帳號"}
             placeHolderTextColor={Colors.primary_light}
             value={""}
@@ -170,7 +172,7 @@ const ResetPasswordPage = () => {
         return (
           <InputBox
             OnChangeText={(str: string) => {}}
-            customStyle={{...styles.input, marginBottom: 10}}
+            customStyle={{ ...styles.input, marginBottom: 10 }}
             placeHolder={"請輸入驗證碼"}
             placeHolderTextColor={Colors.primary_light}
             value={""}
@@ -235,9 +237,11 @@ const ResetPasswordPage = () => {
         <Animated.View
           style={[StyleSheet.absoluteFill, styles.cover, backdrop]}
         />
-         <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 70}
+          style={styles.container}
+        >
           <View style={[styles.sheet]}>
             <Animated.View style={[styles.popup, slideUp]}>
               <View style={styles.sectionRow}>
@@ -246,23 +250,19 @@ const ResetPasswordPage = () => {
                     <Button
                       title=""
                       image={images.icons.leftarrow_icon}
-                      buttonStyle={{height: 20, width: 12}}
+                      buttonStyle={{ height: 20, width: 12 }}
                       imageSize={{ height: 20, width: 12, marginRight: 0 }}
                       type=""
                       onPress={() => handleBack()}
                     />
                   )}
                 </View>
-                <Text
-                  style={ Typography.pageTitle as TextStyle }
-                >
-                  {title}
-                </Text>
+                <Text style={Typography.pageTitle as TextStyle}>{title}</Text>
                 <View style={{ flex: 1, alignItems: "flex-end" }}>
                   <Button
                     title=""
                     image={images.icons.close_icon}
-                    buttonStyle={{height: 30, width: 30}}
+                    buttonStyle={{ height: 30, width: 30 }}
                     imageSize={{ height: 30, width: 30, marginRight: 0 }}
                     type=""
                     onPress={() => handleClose()}
@@ -282,11 +282,13 @@ const ResetPasswordPage = () => {
                     >
                       <Image
                         source={images.icons.success_icon}
-                        style={{ width: 205, height: 205, resizeMode: "contain" }}
+                        style={{
+                          width: 205,
+                          height: 205,
+                          resizeMode: "contain",
+                        }}
                       />
-                      <Text
-                        style={Typography.base_secondary}
-                      >
+                      <Text style={Typography.base_secondary}>
                         密碼設定成功
                       </Text>
                     </View>
@@ -402,7 +404,7 @@ const styles = StyleSheet.create({
   input: {
     width: DEVICE_WIDTH - 40,
     height: 40,
-  }
+  },
 });
 
 export default ResetPasswordPage;

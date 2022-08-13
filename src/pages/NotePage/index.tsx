@@ -14,8 +14,11 @@ import {
   Modal,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation, useIsFocused, useFocusEffect } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import {
+  useNavigation,
+  useIsFocused,
+  useFocusEffect,
+} from "@react-navigation/native";
 import Button from "components/Button/Button";
 import images from "assets/images";
 import { Colors, Spacing, Typography } from "styles";
@@ -32,10 +35,10 @@ import { getAllNotes } from "services/note";
 import { shallowEqual, useSelector } from "react-redux";
 
 const NoteItem: React.FC<NItem> = ({ word, index, id }) => {
-  const navigation = useNavigation<StackNavigationProp<any>>();
+  const navigation = useNavigation();
   const handleOnNoteContent = () => {
     navigation.push("NoteContentPage", {
-      id
+      id,
     });
   };
   return (
@@ -49,7 +52,7 @@ const NoteItem: React.FC<NItem> = ({ word, index, id }) => {
           },
         ]}
       >
-        <Text style={{...Typography.base}}>
+        <Text style={{ ...Typography.base }}>
           {index}. {word}
         </Text>
       </View>
@@ -59,65 +62,79 @@ const NoteItem: React.FC<NItem> = ({ word, index, id }) => {
 
 const NotePage = ({ navigation }: { navigation: any }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [notes, setNotes] = useState<any>([])
-  const [tags, setTags] = useState<any>([])
-  const [tagsData, setTagsData] = useState<any>([])
+  const [notes, setNotes] = useState<any>([]);
+  const [tags, setTags] = useState<any>([]);
+  const [tagsData, setTagsData] = useState<any>([]);
   const queryClient = useQueryClient();
-  const {isLoggedIn}: any = useSelector(
+  const { isLoggedIn }: any = useSelector(
     (state: any) => state.user,
     shallowEqual
   );
   const onSuccessFetchTags = (data: any) => {
-    queryClient.setQueryData('tagsData', data);
-    setTagsData(data)
-  }
-  const onErrorFetchTags = (data: any) => {}
-  const {data: tagData, isLoading: tagLoading, error: tagError, isError: tagIsError, refetch: tagRefetch} = getTag([isLoggedIn], onSuccessFetchTags, onErrorFetchTags, {
+    queryClient.setQueryData("tagsData", data);
+    setTagsData(data);
+  };
+  const onErrorFetchTags = (data: any) => {};
+  const {
+    data: tagData,
+    isLoading: tagLoading,
+    error: tagError,
+    isError: tagIsError,
+    refetch: tagRefetch,
+  } = getTag([isLoggedIn], onSuccessFetchTags, onErrorFetchTags, {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-  })
+  });
 
   const onSuccessFetchNotes = (data: any) => {
-    queryClient.setQueryData('notesData', data);
+    queryClient.setQueryData("notesData", data);
     setNotes(data);
-  }
-  const onErrorFetchNotes = (data: any) => {}
-  const {data: noteData, isLoading: noteLoading, error: noteError, isError: noteIsError, refetch: noteRefetch, isSuccess: noteIsSuccess} = getAllNotes([isLoggedIn], onSuccessFetchNotes, onErrorFetchNotes,{
+  };
+  const onErrorFetchNotes = (data: any) => {};
+  const {
+    data: noteData,
+    isLoading: noteLoading,
+    error: noteError,
+    isError: noteIsError,
+    refetch: noteRefetch,
+    isSuccess: noteIsSuccess,
+  } = getAllNotes([isLoggedIn], onSuccessFetchNotes, onErrorFetchNotes, {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-  })
+  });
 
   useFocusEffect(
     useCallback(() => {
-      noteRefetch()
-      tagRefetch()
-      setTags([])
+      noteRefetch();
+      tagRefetch();
+      setTags([]);
     }, [])
-  )
+  );
 
   const insets = useSafeAreaInsets();
 
-  const handleOnFilter = () => { 
-    const newArr: number[] = []
-    for(let i = 0; i<noteData.length; i++){
-      if(tags.every((item:any) => noteData[i]['tag_ids'].includes(item))) newArr.push(noteData[i])
+  const handleOnFilter = () => {
+    const newArr: number[] = [];
+    for (let i = 0; i < noteData.length; i++) {
+      if (tags.every((item: any) => noteData[i]["tag_ids"].includes(item)))
+        newArr.push(noteData[i]);
     }
-    setNotes(newArr)
+    setNotes(newArr);
   };
 
   const handleOnAddNote = () => {
-    if(!(notes.length === 5)) {
+    if (!(notes.length === 5)) {
       navigation.push("NewNotePage", {
-        type: "add"
-      })
+        type: "add",
+      });
     } else {
-      setModalVisible(true)
+      setModalVisible(true);
     }
-  }
-
+  };
+  console.log("note,", notes);
   return (
     <>
-     <Modal
+      <Modal
         animationType="fade"
         transparent={true}
         visible={modalVisible}
@@ -129,8 +146,8 @@ const NotePage = ({ navigation }: { navigation: any }) => {
           title={"筆記數量已達上限, 請升級或刪除其他筆記!"}
           onCancel={() => setModalVisible(false)}
           onConfirm={() => {
-            setModalVisible(false)
-            navigation.navigate('SubscribePage')
+            setModalVisible(false);
+            navigation.navigate("SubscribePage");
           }}
           confirmString={"立即升級"}
         />
@@ -165,88 +182,96 @@ const NotePage = ({ navigation }: { navigation: any }) => {
             image={images.icons.add_icon}
             isDisabled={!isLoggedIn}
           />
-          {
-            isLoggedIn ? 
-              noteLoading && tagLoading ? <ActivityIndicator size="large" /> : 
-                <>
-                  {
-                    (tagData!=="Unauthorized" && tagData !== undefined) && 
-                    <View style={styles.sectionRow}>
-                      {
-                        tagsData.map((tag:any, index: React.Key | null | undefined) => {
-                          return (
-                            <Tag
-                              key={index}
-                              title={tag['tag_name']}
-                              onPress={()=>handleOnFilter()}
-                              customStyle={{
-                                paddingHorizontal: 15,
-                                paddingVertical: 3,
-                                marginRight: 5,
-                                marginBottom: 5,
-                                height: 24,
-                              }}
-                              disable={false}
-                              onPressIn={() => {
-                                if(tags.includes(tag['id'])){
-                                  setTags(tags.filter((item: number) => item!== tag['id']))
-                                } else {
-                                  setTags([...tags, tag['id']])
-                                }
-                              }}
-                              isChoosed = {tags.includes(tag['id'])}
-                            />
-                          );
-                        })
+          {isLoggedIn ? (
+            noteLoading && tagLoading ? (
+              <ActivityIndicator size="large" />
+            ) : (
+              <>
+                {tagData !== "Unauthorized" && tagData !== undefined && (
+                  <View style={styles.sectionRow}>
+                    {tagsData.map(
+                      (tag: any, index: React.Key | null | undefined) => {
+                        return (
+                          <Tag
+                            key={index}
+                            title={tag["tag_name"]}
+                            onPress={() => handleOnFilter()}
+                            customStyle={{
+                              paddingHorizontal: 15,
+                              paddingVertical: 3,
+                              marginRight: 5,
+                              marginBottom: 5,
+                            }}
+                            disable={false}
+                            onPressIn={() => {
+                              if (tags.includes(tag["id"])) {
+                                setTags(
+                                  tags.filter(
+                                    (item: number) => item !== tag["id"]
+                                  )
+                                );
+                              } else {
+                                setTags([...tags, tag["id"]]);
+                              }
+                            }}
+                            isChoosed={tags.includes(tag["id"])}
+                          />
+                        );
                       }
-                    </View>
-                  }
-                  {
-                    noteIsSuccess && noteData.length === 0 ? 
-                    <View
-                      style={{
-                        flex: 1,
-                        paddingBottom: 83,
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Image
-                        style={styles.imagenotestyle}
-                        source={images.icons.note_icon}
-                      />
-                      <Text style={{ color: Colors.gray_4 }}>尚未新增筆記</Text>
-                    </View>
-                    :
-                    <FlatList
-                      contentContainerStyle={{
-                        flexGrow: 1,
-                      }}
-                      showsVerticalScrollIndicator={false}
-                      data={notes}
-                      renderItem={({ item, index }) => (
-                        <NoteItem key={index} word={item.title} index={index + 1} id={item.id} />
-                      )}
-                      keyExtractor={(item, index) => index.toString()}
+                    )}
+                  </View>
+                )}
+                {noteIsSuccess && notes.length === 0 ? (
+                  <View
+                    style={{
+                      flex: 1,
+                      paddingBottom: 83,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Image
+                      style={styles.imagenotestyle}
+                      source={images.icons.note_icon}
                     />
-                  }
-                </>
-              :
-                <View
-                  style={{
-                    flex: 1,
-                    paddingBottom: 83,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Image
-                    style={styles.imagenotestyle}
-                    source={images.icons.note_icon}
+                    <Text style={{ color: Colors.gray_4 }}>尚未新增筆記</Text>
+                  </View>
+                ) : (
+                  <FlatList
+                    contentContainerStyle={{
+                      flexGrow: 1,
+                    }}
+                    showsVerticalScrollIndicator={false}
+                    data={notes}
+                    renderItem={({ item, index }) => (
+                      <NoteItem
+                        key={index}
+                        word={item.title}
+                        index={index + 1}
+                        id={item.id}
+                      />
+                    )}
+                    keyExtractor={(item, index) => index.toString()}
                   />
-                  <Text style={{ color: Colors.gray_4 }}>尚未登入</Text>
-                </View>
-          }
+                )}
+              </>
+            )
+          ) : (
+            <View
+              style={{
+                flex: 1,
+                paddingBottom: 83,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Image
+                style={styles.imagenotestyle}
+                source={images.icons.note_icon}
+              />
+              <Text style={{ color: Colors.gray_4 }}>尚未登入</Text>
+            </View>
+          )}
         </SafeAreaView>
       </LinearGradientLayout>
     </>

@@ -25,7 +25,7 @@ import { Dispatch } from "redux";
 import { Colors, Spacing, Typography } from "styles";
 import LinearGradientLayout from "components/LinearGradientLayout";
 import { ScrollView } from "react-native-gesture-handler";
-import * as Facebook from 'expo-facebook';
+import * as Facebook from "expo-facebook";
 import { useQueryClient } from "react-query";
 
 const PersonalProfilePage = ({
@@ -36,7 +36,7 @@ const PersonalProfilePage = ({
   route: any;
 }) => {
   const dispatch: Dispatch<any> = useDispatch();
-  const {isLoggedIn, isFacebookLogIn}: any = useSelector(
+  const { isLoggedIn, isFacebookLogIn }: any = useSelector(
     (state: any) => state.user,
     shallowEqual
   );
@@ -46,12 +46,12 @@ const PersonalProfilePage = ({
   const [pickedImagePath, setPickedImagePath] = React.useState("");
   const options = ["移除目前的相片", "相機", "從相簿"];
   const queryClient = useQueryClient();
-  
+
   useEffect(() => {
-    if(!isLoggedIn){
-      navigation.push('SettingPage')
+    if (!isLoggedIn) {
+      navigation.push("SettingPage");
     }
-  }, [isLoggedIn])
+  }, [isLoggedIn]);
 
   const handleBack = () => {
     navigation.goBack();
@@ -162,16 +162,18 @@ const PersonalProfilePage = ({
           title={"確定要登出？"}
           onCancel={() => setLogoutModal(!logoutModal)}
           onConfirm={() => {
-            if(isFacebookLogIn){
-              Facebook.logOutAsync().then(() => {
-                queryClient.clear()
-                dispatch(setFacebookLogout())
-              }).catch(err => console.log(err))
-            }else{
-              queryClient.clear()
-              dispatch(setUserLogout())
+            if (isFacebookLogIn) {
+              Facebook.logOutAsync()
+                .then(() => {
+                  queryClient.clear();
+                  dispatch(setFacebookLogout());
+                })
+                .catch((err) => console.log(err));
+            } else {
+              queryClient.clear();
+              dispatch(setUserLogout());
             }
-            setLogoutModal(!logoutModal)
+            setLogoutModal(!logoutModal);
           }}
           confirmString={"確定"}
         />
@@ -187,7 +189,6 @@ const PersonalProfilePage = ({
           <View
             style={{
               flexDirection: "row",
-              // alignItems: "center",
               paddingHorizontal: 20,
             }}
           >
@@ -195,26 +196,25 @@ const PersonalProfilePage = ({
               <Button
                 title=""
                 image={images.icons.leftarrow_icon}
-                buttonStyle={{height: 20, width: 12,}}
+                buttonStyle={{ height: 20, width: 12 }}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleBack()}
               />
             </View>
 
-            <Text
-              style={ Typography.pageTitle as TextStyle }
-            >
-              個人資訊
-            </Text>
+            <Text style={Typography.pageTitle as TextStyle}>個人資訊</Text>
             <View style={{ flex: 1, alignItems: "flex-end" }} />
           </View>
-          <ScrollView>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={false}
+          >
             <View
               style={{
                 flexDirection: "column",
                 alignItems: "center",
-                paddingBottom: 20
+                paddingBottom: 20,
               }}
             >
               <ProfileImage
@@ -237,12 +237,11 @@ const PersonalProfilePage = ({
                 buttonStyle={{
                   flexDirection: "row",
                   marginBottom: 40,
-                  width: 64,
-                  height: 19,
+                  width: 70,
                 }}
                 type="text"
                 fontStyle={{
-                  ...Typography.base_secondary
+                  ...Typography.base_secondary,
                 }}
               />
               <View>
@@ -262,12 +261,7 @@ const PersonalProfilePage = ({
                           alignItems: "center",
                         }}
                       >
-                        <Text
-                          style={[
-                            styles.sectionText,
-                            styles.info
-                          ]}
-                        >
+                        <Text style={[styles.sectionText, styles.info]}>
                           {"Samalia Juda"}
                         </Text>
                         <Image
@@ -286,16 +280,14 @@ const PersonalProfilePage = ({
                     <View
                       style={[
                         styles.sectionRow,
-                        { borderBottomColor: Colors.primary_light, borderBottomWidth: 1 },
+                        {
+                          borderBottomColor: Colors.primary_light,
+                          borderBottomWidth: 1,
+                        },
                       ]}
                     >
                       <Text style={styles.sectionText}>{"電子信箱"}</Text>
-                      <Text
-                        style={[
-                          styles.sectionText,
-                          styles.info
-                        ]}
-                      >
+                      <Text style={[styles.sectionText, styles.info]}>
                         {"mercucu@gmail.com"}
                       </Text>
                     </View>
@@ -317,12 +309,7 @@ const PersonalProfilePage = ({
                           alignItems: "center",
                         }}
                       >
-                        <Text
-                          style={[
-                            styles.sectionText,
-                            styles.info
-                          ]}
-                        >
+                        <Text style={[styles.sectionText, styles.info]}>
                           {"30天方案"}
                         </Text>
                         <Image
@@ -341,7 +328,10 @@ const PersonalProfilePage = ({
                     <View
                       style={[
                         styles.sectionRow,
-                        { borderBottomColor: Colors.primary_light, borderBottomWidth: 1 },
+                        {
+                          borderBottomColor: Colors.primary_light,
+                          borderBottomWidth: 1,
+                        },
                       ]}
                     >
                       <Text style={styles.sectionText}>{"訂單記錄"}</Text>
@@ -359,7 +349,7 @@ const PersonalProfilePage = ({
                       style={{
                         textAlign: "center",
                         color: Colors.light_red,
-                        ...Typography.base_bold
+                        ...Typography.base_bold,
                       }}
                     >
                       登出
@@ -408,7 +398,7 @@ const styles = StyleSheet.create({
     ...Typography.base,
     color: Colors.info,
     marginRight: 11,
-  }
+  },
 });
 
 export default PersonalProfilePage;

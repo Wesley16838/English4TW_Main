@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  TextInput
+  TextInput,
 } from "react-native";
 import Button from "components/Button/Button";
 import InputBox from "components/InputBox/InputBox";
@@ -23,14 +23,18 @@ import ActionSheet from "components/ActionSheet/ActionSheet";
 import { Colors, Spacing, Typography } from "styles";
 import images from "assets/images";
 import { DEVICE_WIDTH, DEVICE_HEIGHT } from "pages/SplashPage";
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { RouteProp, NavigationProp, ParamListBase } from '@react-navigation/native';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import {
+  RouteProp,
+  NavigationProp,
+  ParamListBase,
+} from "@react-navigation/native";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import authDeviceStorage from "services/authDeviceStorage";
 import axios from "axios";
 import { getTag } from "services/tag";
 import { getNoteById } from "services/note";
-import { tagOptions } from "utils/constants"; 
+import { tagOptions } from "utils/constants";
 // 新增標籤, deleteUserNoteTag, addUserNoteTag, addUserNoteNewTag if edit post, addUserTag if add post, deleteUserNote
 const NewNotePage = () => {
   const [animation, setAnimation] = useState(new Animated.Value(0));
@@ -38,24 +42,40 @@ const NewNotePage = () => {
     main: false,
     edit: false,
     delete: false,
-    action: false
+    action: false,
   });
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const firstInput = React.createRef<TextInput>()
-  const secondInput = React.createRef<TextInput>()
-  const navigation: NavigationProp<ParamListBase> = useNavigation();
+  const firstInput = React.createRef<TextInput>();
+  const secondInput = React.createRef<TextInput>();
+  const navigation = useNavigation();
   const queryClient = useQueryClient();
-  const route: RouteProp<{ params: { title: string, tags: [], id: number, content: string, type: string } }, 'params'> = useRoute();
+  const route: RouteProp<
+    {
+      params: {
+        title: string;
+        tags: [];
+        id: number;
+        content: string;
+        type: string;
+      };
+    },
+    "params"
+  > = useRoute();
   const { title, tags, content, id, type } = route.params;
-  const [note, setNote] = useState<{title: string, content: string, featured_opt: number, tag_ids: number[]}>({
+  const [note, setNote] = useState<{
+    title: string;
+    content: string;
+    featured_opt: number;
+    tag_ids: number[];
+  }>({
     title: title || "",
     content: content || "",
     featured_opt: 0,
-    tag_ids: (tags && tags.map((tag:any) => tag?.id)) || []
+    tag_ids: (tags && tags.map((tag: any) => tag?.id)) || [],
   });
   const [tag, setTag] = useState({
     id: "",
-    name: ""
+    name: "",
   });
 
   const onSuccessFetchNoteById = (data: any) => {
@@ -63,21 +83,29 @@ const NewNotePage = () => {
       ...note,
       title: data.title,
       content: data.content,
-      tag_ids: [...data.tags.map((tag:any) => tag?.id)]
+      tag_ids: [...data.tags.map((tag: any) => tag?.id)],
     });
-  }
-  const onErrorFetchNoteById = (data: any) => {}
-  const { mutate: handleOngetNoteById } = getNoteById(onSuccessFetchNoteById, onErrorFetchNoteById)
+  };
+  const onErrorFetchNoteById = (data: any) => {};
+  const { mutate: handleOngetNoteById } = getNoteById(
+    onSuccessFetchNoteById,
+    onErrorFetchNoteById
+  );
   useEffect(() => {
-    if(type === "edit")  handleOngetNoteById(id.toString())
-  }, [])
+    if (type === "edit") handleOngetNoteById(id.toString());
+  }, []);
 
-  const onSuccessFetchTags = (data: any) => {}
-  const onErrorFetchTags = (data: any) => {}
-  const {data: tagsData, isLoading: tagLoading, error: tagError, isError: tagIsError} = getTag([], onSuccessFetchTags, onErrorFetchTags)
+  const onSuccessFetchTags = (data: any) => {};
+  const onErrorFetchTags = (data: any) => {};
+  const {
+    data: tagsData,
+    isLoading: tagLoading,
+    error: tagError,
+    isError: tagIsError,
+  } = getTag([], onSuccessFetchTags, onErrorFetchTags);
   let selectedTag = {
     id: "",
-    name: ""
+    name: "",
   };
   let token: null = null;
 
@@ -119,207 +147,243 @@ const NewNotePage = () => {
     Add Form: Add user tag
     Edit Form: Add user-note new tag
   */
-  const {mutate:handleOnAddTag} = useMutation(
-    async() => {
-      try{
+  const { mutate: handleOnAddTag } = useMutation(
+    async () => {
+      try {
         const result = await authDeviceStorage.getItem("JWT_TOKEN");
-        if(result) token = JSON.parse(result).token
-        const data = {...(type === 'edit' && {note_id: id}), tag_name: tag.name}
-        await axios.post(`https://www.english4tw.com/api/${type === 'add' ? 'addUserTag' : 'addUserNoteNewTag'}`, data,{ 
-          headers: {
-            "Authorization" : `Bearer ${token}`,
-            "content-type" : "application/json"
+        if (result) token = JSON.parse(result).token;
+        const data = {
+          ...(type === "edit" && { note_id: id }),
+          tag_name: tag.name,
+        };
+        await axios.post(
+          `https://www.english4tw.com/api/${
+            type === "add" ? "addUserTag" : "addUserNoteNewTag"
+          }`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "content-type": "application/json",
+            },
           }
-        })
-      }catch(err){
-        console.log(err)
+        );
+      } catch (err) {
+        console.log(err);
       }
     },
     {
       onSuccess: () => {
-        queryClient.refetchQueries('tags')
+        queryClient.refetchQueries("tags");
         setTag({
           id: "",
-          name: ""
-        })
-        setAddModalVisible(!addModalVisible)
-      }
+          name: "",
+        });
+        setAddModalVisible(!addModalVisible);
+      },
     }
-  )
-  const {mutate:handleOnUpdateTag} = useMutation(
-    async() => {
-      try{
+  );
+  const { mutate: handleOnUpdateTag } = useMutation(
+    async () => {
+      try {
         const result = await authDeviceStorage.getItem("JWT_TOKEN");
-        if(result) token = JSON.parse(result).token
-        const res = await axios.post("https://www.english4tw.com/api/updateUserTag", { tag_id: parseInt(tag.id), tag_name: tag.name },{ 
-          headers: {
-            "Authorization" : `Bearer ${token}`,
-            "content-type" : "application/json"
+        if (result) token = JSON.parse(result).token;
+        const res = await axios.post(
+          "https://www.english4tw.com/api/updateUserTag",
+          { tag_id: parseInt(tag.id), tag_name: tag.name },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "content-type": "application/json",
+            },
           }
-        })
-      }catch(err){
-
-      }
+        );
+      } catch (err) {}
     },
     {
       onSuccess: () => {
-        queryClient.refetchQueries('tags')
+        queryClient.refetchQueries("tags");
         setTag({
           id: "",
-          name: ""
-        })
+          name: "",
+        });
         setMainModalVisible({
           ...mainModalVisible,
           edit: false,
           main: false,
-        })
-      }
+        });
+      },
     }
-  )
-  const {mutate:handleOnDeleteTag} = useMutation(
-    async() => {
-      try{
+  );
+  const { mutate: handleOnDeleteTag } = useMutation(
+    async () => {
+      try {
         const result = await authDeviceStorage.getItem("JWT_TOKEN");
-        if(result) token = JSON.parse(result).token
-        await axios.post("https://www.english4tw.com/api/deleteUserTag", { tag_id: tag.id },{ 
-          headers: {
-            "Authorization" : `Bearer ${token}`,
-            "content-type" : "application/json"
+        if (result) token = JSON.parse(result).token;
+        await axios.post(
+          "https://www.english4tw.com/api/deleteUserTag",
+          { tag_id: tag.id },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "content-type": "application/json",
+            },
           }
-        })
-      }catch(err){
-
-      }
+        );
+      } catch (err) {}
     },
     {
       onSuccess: () => {
-        queryClient.refetchQueries('tags')
+        queryClient.refetchQueries("tags");
         setTag({
           id: "",
-          name: ""
-        })
+          name: "",
+        });
         setMainModalVisible({
           ...mainModalVisible,
           delete: false,
-          main: false
-        })
-      }
+          main: false,
+        });
+      },
     }
-  )
-  const {mutate:handleOnDeleteNoteTag, isLoading: deleteTagLoading} = useMutation(
-    async() => {
-      try{
+  );
+  const {
+    mutate: handleOnDeleteNoteTag,
+    isLoading: deleteTagLoading,
+  } = useMutation(
+    async () => {
+      try {
         const result = await authDeviceStorage.getItem("JWT_TOKEN");
-        if(result) token = JSON.parse(result).token
-        const res = await axios.post("https://www.english4tw.com/api/deleteUserNoteTag", { note_id: id, tag_id: tag.id },{ 
-          headers: {
-            "Authorization" : `Bearer ${token}`,
-            "content-type" : "application/json"
+        if (result) token = JSON.parse(result).token;
+        const res = await axios.post(
+          "https://www.english4tw.com/api/deleteUserNoteTag",
+          { note_id: id, tag_id: tag.id },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "content-type": "application/json",
+            },
           }
-        })
-      }catch(err){
-
-      }
+        );
+      } catch (err) {}
     },
     {
       onSuccess: () => {
-        setNote({...note, tag_ids: note.tag_ids.filter(tagId => tagId !== parseInt(tag.id))})
+        setNote({
+          ...note,
+          tag_ids: note.tag_ids.filter((tagId) => tagId !== parseInt(tag.id)),
+        });
         setTag({
           id: "",
-          name: ""
-        })
-      }
+          name: "",
+        });
+      },
     }
-  )
-  const {mutate:handleOnAddNoteTag, isLoading: addTagLoading} = useMutation(
-    async() => {
-      try{
+  );
+  const { mutate: handleOnAddNoteTag, isLoading: addTagLoading } = useMutation(
+    async () => {
+      try {
         const result = await authDeviceStorage.getItem("JWT_TOKEN");
-        if(result) token = JSON.parse(result).token
-        const data = await axios.post("https://www.english4tw.com/api/addUserNoteTag", { note_id: id, tag_id: tag.id },{ 
-          headers: {
-            "Authorization" : `Bearer ${token}`,
-            "content-type" : "application/json"
+        if (result) token = JSON.parse(result).token;
+        const data = await axios.post(
+          "https://www.english4tw.com/api/addUserNoteTag",
+          { note_id: id, tag_id: tag.id },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "content-type": "application/json",
+            },
           }
-        })
-        return data.data
-      }catch(err){
-
-      }
+        );
+        return data.data;
+      } catch (err) {}
     },
     {
       onSuccess: (data) => {
-        setNote({ ...note, tag_ids:[...note.tag_ids, parseInt(tag.id)]})
+        setNote({ ...note, tag_ids: [...note.tag_ids, parseInt(tag.id)] });
         setTag({
           id: "",
-          name: ""
-        })
-      }
+          name: "",
+        });
+      },
     }
-  )
-  const {mutate:handleOnDeleteNote, isLoading: DeleteNoteLoading} = useMutation(
-    async() => {
-      try{
+  );
+  const {
+    mutate: handleOnDeleteNote,
+    isLoading: DeleteNoteLoading,
+  } = useMutation(
+    async () => {
+      try {
         const result = await authDeviceStorage.getItem("JWT_TOKEN");
-        if(result) token = JSON.parse(result).token
-        await axios.post("https://www.english4tw.com/api/deleteUserNote", { note_id: id },{ 
-          headers: {
-            "Authorization" : `Bearer ${token}`,
-            "content-type" : "application/json"
+        if (result) token = JSON.parse(result).token;
+        await axios.post(
+          "https://www.english4tw.com/api/deleteUserNote",
+          { note_id: id },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "content-type": "application/json",
+            },
           }
-        })
-      }catch(err){
-
-      }
+        );
+      } catch (err) {}
     },
     {
-      onSuccess: () => navigation.navigate('NotePage')
+      onSuccess: () => navigation.navigate("NotePage"),
     }
-  )
-  const {mutate:handleOnSubmit, isLoading} = useMutation(
-    async() => {
-      try{
+  );
+  const { mutate: handleOnSubmit, isLoading } = useMutation(
+    async () => {
+      try {
         const result = await authDeviceStorage.getItem("JWT_TOKEN");
-        if(result) token = JSON.parse(result).token
+        if (result) token = JSON.parse(result).token;
         switch (type) {
-          case 'add':
-            await axios.post("https://www.english4tw.com/api/addUserNote", note,{ 
-              headers: {
-                "Authorization" : `Bearer ${token}`,
-                "content-type" : "application/json"
+          case "add":
+            await axios.post(
+              "https://www.english4tw.com/api/addUserNote",
+              note,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "content-type": "application/json",
+                },
               }
-            })
+            );
             break;
-          case 'edit':
-            await axios.post("https://www.english4tw.com/api/updateUserNote", {
-              note_id: id,
-              title: note.title,
-              content: note.content,
-              featured_opt: 0,
-            },{ 
-              headers: {
-                "Authorization" : `Bearer ${token}`,
-                "content-type" : "application/json"
+          case "edit":
+            await axios.post(
+              "https://www.english4tw.com/api/updateUserNote",
+              {
+                note_id: id,
+                title: note.title,
+                content: note.content,
+                featured_opt: 0,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "content-type": "application/json",
+                },
               }
-            })
+            );
             break;
         }
-      }catch(e){
-        throw e
+      } catch (e) {
+        throw e;
       }
     },
     {
       onSuccess: () => navigation.goBack(),
-      onError: (err) => console.log('err,', err)
+      onError: (err) => console.log("err,", err),
     }
-  )
+  );
 
   const slideUp = {
     transform: [
       {
         translateY: animation.interpolate({
           inputRange: [0.01, 1],
-          outputRange: [0, -.93 * DEVICE_HEIGHT],
+          outputRange: [0, -0.93 * DEVICE_HEIGHT],
           extrapolate: "clamp",
         }),
       },
@@ -332,15 +396,15 @@ const NewNotePage = () => {
         setMainModalVisible({
           ...mainModalVisible,
           edit: true,
-          action: false
-        })
+          action: false,
+        });
         break;
       case "刪除":
         setMainModalVisible({
           ...mainModalVisible,
           delete: true,
-          action: false
-        })
+          action: false,
+        });
         break;
     }
   };
@@ -357,7 +421,7 @@ const NewNotePage = () => {
       >
         <View style={[StyleSheet.absoluteFill, styles.centeredView]}>
           <ActivityIndicator size="large" />
-        </View> 
+        </View>
       </Modal>
       <Modal
         animationType="fade"
@@ -370,7 +434,7 @@ const NewNotePage = () => {
         <ModalContainer
           children={
             <InputBox
-              OnChangeText={(str: string) => setTag({...tag, name: str})}
+              OnChangeText={(str: string) => setTag({ ...tag, name: str })}
               customStyle={{
                 width: 240,
                 height: 40,
@@ -394,11 +458,11 @@ const NewNotePage = () => {
           Alert.alert("Modal has been closed.");
         }}
       >
-        {
-          mainModalVisible.edit && <ModalContainer
+        {mainModalVisible.edit && (
+          <ModalContainer
             children={
               <InputBox
-                OnChangeText={(str: string) => setTag({...tag, name: str})}
+                OnChangeText={(str: string) => setTag({ ...tag, name: str })}
                 customStyle={{
                   width: 240,
                   height: 40,
@@ -415,13 +479,13 @@ const NewNotePage = () => {
                 ...mainModalVisible,
                 main: false,
                 edit: false,
-              })
+              });
             }}
-            onConfirm={() =>handleOnUpdateTag()}
+            onConfirm={() => handleOnUpdateTag()}
           />
-        }
-        {
-          mainModalVisible.delete && <ModalContainer
+        )}
+        {mainModalVisible.delete && (
+          <ModalContainer
             title={"刪除"}
             subtitle={"確定要刪除標籤？"}
             onCancel={() => {
@@ -429,24 +493,25 @@ const NewNotePage = () => {
                 ...mainModalVisible,
                 main: false,
                 delete: false,
-              })
+              });
             }}
             onConfirm={() => handleOnDeleteTag()}
             confirmString={"確定"}
           />
-        }
-        {
-          mainModalVisible.action && <ActionSheet
-            OnCancel={() => setMainModalVisible({
-              ...mainModalVisible,
-              main: false,
-              action: false
-            })}
+        )}
+        {mainModalVisible.action && (
+          <ActionSheet
+            OnCancel={() =>
+              setMainModalVisible({
+                ...mainModalVisible,
+                main: false,
+                action: false,
+              })
+            }
             OnClick={(action: string) => handleOnAction(action)}
             options={tagOptions}
           />
-        }
-         
+        )}
       </Modal>
       <View style={styles.container}>
         <Animated.View
@@ -454,9 +519,16 @@ const NewNotePage = () => {
         />
         <View style={[styles.sheet]}>
           <Animated.View style={[styles.popup, slideUp]}>
-            <View style={[styles.sectionRow, {justifyContent: type === "edit" ? "space-between" : "flex-end"}]}>
-              {
-                type === "edit" &&
+            <View
+              style={[
+                styles.sectionRow,
+                {
+                  justifyContent:
+                    type === "edit" ? "space-between" : "flex-end",
+                },
+              ]}
+            >
+              {type === "edit" && (
                 <Button
                   title=""
                   image={images.icons.delete_icon}
@@ -465,7 +537,7 @@ const NewNotePage = () => {
                   type=""
                   onPress={() => handleOnDeleteNote()}
                 />
-              }
+              )}
               <Button
                 title=""
                 image={images.icons.close_icon}
@@ -476,20 +548,33 @@ const NewNotePage = () => {
               />
             </View>
             <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.container}>
-              <ScrollView contentContainerStyle={{flexGrow: 1}} contentInset={{bottom: 80}} showsVerticalScrollIndicator={false}>
-                <View style={{
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}>
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 85}
+              style={styles.container}
+            >
+              <ScrollView
+                contentInset={{ bottom: 100 }}
+                contentContainerStyle={{
+                  flexGrow: 1,
+                  paddingBottom: Platform.OS !== "ios" ? 70 : 0,
+                }}
+                showsVerticalScrollIndicator={false}
+              >
+                <View
+                  style={{
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
                   <InputBox
-                    OnChangeText={(str: string) => setNote({ ...note, title: str })}
+                    OnChangeText={(str: string) =>
+                      setNote({ ...note, title: str })
+                    }
                     customStyle={{
-                    width: DEVICE_WIDTH - 40,
-                    height: 40,
-                    marginBottom: Spacing.space_l,
-                    marginTop: 20
+                      width: DEVICE_WIDTH - 40,
+                      height: 40,
+                      marginBottom: Spacing.space_l,
+                      marginTop: 20,
                     }}
                     placeHolder={"輸入標題"}
                     placeHolderTextColor={Colors.primary_light}
@@ -501,7 +586,9 @@ const NewNotePage = () => {
                     ref={firstInput}
                   />
                   <TextArea
-                    OnChangeText={(str: string) => setNote({ ...note, content: str })}
+                    OnChangeText={(str: string) =>
+                      setNote({ ...note, content: str })
+                    }
                     source={Images.icons.microCircle_icon}
                     placeHolder={"輸入內容"}
                     customStyle={{
@@ -510,8 +597,8 @@ const NewNotePage = () => {
                       marginBottom: Spacing.space_l,
                     }}
                     placeHolderTextColor={Colors.primary_light}
-                    limit={1000} 
-                    value={note.content}  
+                    limit={1000}
+                    value={note.content}
                     isDisabled={isLoading}
                     ref={secondInput}
                   />
@@ -530,51 +617,76 @@ const NewNotePage = () => {
                       isDisabled={isLoading}
                     />
                     {tagsData &&
-                      tagsData.map((tag: any, index: React.Key | null | undefined) => {
-                        return (
-                          <Tag
-                            key={index}
-                            title={tag['tag_name']}
-                            onPressIn={()=>setTag({
-                              id: tag.id,
-                              name: tag.tag_name
-                            })}
-                            onPress={() => {
-                              if(note.tag_ids.includes(tag['id'])){
-                                if(type === "add") {
-                                  setNote({...note, tag_ids: note.tag_ids.filter(tagId => tagId !== parseInt(tag.id))})
-                                } else {
-                                  setNote({...note, tag_ids: note.tag_ids.filter(tagId => tagId !== parseInt(tag.id))})
-                                  handleOnDeleteNoteTag(tag['id'])
-                                }
-                              } else {
-                                if(type === "add") {
-                                  setNote({ ...note, tag_ids:[...note.tag_ids, parseInt(tag.id)]})
-                                } else {
-                                  setNote({ ...note, tag_ids:[...note.tag_ids, parseInt(tag.id)]})
-                                  handleOnAddNoteTag(tag['tag_name'])
-                                }
+                      tagsData.map(
+                        (tag: any, index: React.Key | null | undefined) => {
+                          return (
+                            <Tag
+                              key={index}
+                              title={tag["tag_name"]}
+                              onPressIn={() =>
+                                setTag({
+                                  id: tag.id,
+                                  name: tag.tag_name,
+                                })
                               }
-                            }}
-                            onLongPress={() => {
-                              setMainModalVisible({
-                                ...mainModalVisible,
-                                main: true,
-                                action: true
-                              })
-                            }}
-                            customStyle={{
-                              paddingHorizontal: 15,
-                              paddingVertical: 3,
-                              marginRight: 5,
-                              marginBottom: 5,
-                              height: 24,
-                            }}
-                            disable={isLoading}
-                            isChoosed={note.tag_ids.includes(tag['id'])}
-                          />
-                        );
-                      })}
+                              onPress={() => {
+                                if (note.tag_ids.includes(tag["id"])) {
+                                  if (type === "add") {
+                                    setNote({
+                                      ...note,
+                                      tag_ids: note.tag_ids.filter(
+                                        (tagId) => tagId !== parseInt(tag.id)
+                                      ),
+                                    });
+                                  } else {
+                                    setNote({
+                                      ...note,
+                                      tag_ids: note.tag_ids.filter(
+                                        (tagId) => tagId !== parseInt(tag.id)
+                                      ),
+                                    });
+                                    handleOnDeleteNoteTag(tag["id"]);
+                                  }
+                                } else {
+                                  if (type === "add") {
+                                    setNote({
+                                      ...note,
+                                      tag_ids: [
+                                        ...note.tag_ids,
+                                        parseInt(tag.id),
+                                      ],
+                                    });
+                                  } else {
+                                    setNote({
+                                      ...note,
+                                      tag_ids: [
+                                        ...note.tag_ids,
+                                        parseInt(tag.id),
+                                      ],
+                                    });
+                                    handleOnAddNoteTag(tag["tag_name"]);
+                                  }
+                                }
+                              }}
+                              onLongPress={() => {
+                                setMainModalVisible({
+                                  ...mainModalVisible,
+                                  main: true,
+                                  action: true,
+                                });
+                              }}
+                              customStyle={{
+                                paddingHorizontal: 15,
+                                paddingVertical: 3,
+                                marginRight: 5,
+                                marginBottom: 5,
+                              }}
+                              disable={isLoading}
+                              isChoosed={note.tag_ids.includes(tag["id"])}
+                            />
+                          );
+                        }
+                      )}
                   </View>
                   <View style={{ paddingHorizontal: Spacing.space_l }}>
                     <View style={styles.row}>
@@ -582,9 +694,7 @@ const NewNotePage = () => {
                         <Text>{"\u2022" + " "}</Text>
                       </View>
                       <View style={styles.bulletText}>
-                        <Text
-                          style={styles.info}
-                        >
+                        <Text style={styles.info}>
                           你可以新增英文和中文到筆記裡,
                           英文可以使用發音和單字查詢功能, 中文則無.
                         </Text>
@@ -595,9 +705,7 @@ const NewNotePage = () => {
                         <Text>{"\u2022" + " "}</Text>
                       </View>
                       <View style={styles.bulletText}>
-                        <Text
-                          style={styles.info}
-                        >
+                        <Text style={styles.info}>
                           為避免影響音擋播放功能,
                           點擊播放鍵後開始20秒內將無法操作其他功能.
                         </Text>
@@ -608,9 +716,7 @@ const NewNotePage = () => {
                         <Text>{"\u2022" + " "}</Text>
                       </View>
                       <View style={styles.bulletText}>
-                        <Text
-                          style={styles.info}
-                        >
+                        <Text style={styles.info}>
                           若要改變音擋的播放段落, 將文章依需求段行即可
                         </Text>
                       </View>
@@ -620,9 +726,7 @@ const NewNotePage = () => {
                         <Text>{"\u2022" + " "}</Text>
                       </View>
                       <View style={styles.bulletText}>
-                        <Text
-                          style={styles.info}
-                        >
+                        <Text style={styles.info}>
                           長按標籤即可進行編輯/刪除
                         </Text>
                       </View>
@@ -637,7 +741,7 @@ const NewNotePage = () => {
                       marginTop: 25,
                     }}
                     fontStyle={{
-                      ...Typography.base_bold
+                      ...Typography.base_bold,
                     }}
                     type="1"
                     onPress={() => handleOnSubmit()}
@@ -655,7 +759,6 @@ const NewNotePage = () => {
 
 const styles = StyleSheet.create({
   bullet: {
-    
     width: 10,
   },
   bulletText: {},
@@ -682,11 +785,11 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2
+      height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5
+    elevation: 5,
   },
   sheet: {
     height: DEVICE_HEIGHT,
@@ -694,7 +797,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: DEVICE_HEIGHT,
     left: 0,
-    right: 0, 
+    right: 0,
   },
   topic: {
     flexDirection: "row",
@@ -716,7 +819,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderTopLeftRadius: 13,
     borderTopRightRadius: 13,
-    position: 'relative'
+    position: "relative",
   },
   sectionRow: {
     flexDirection: "row",
@@ -746,8 +849,8 @@ const styles = StyleSheet.create({
   },
   info: {
     ...Typography.sm,
-      color: Colors.gray_3,
-  }
+    color: Colors.gray_3,
+  },
 });
 
 export default NewNotePage;

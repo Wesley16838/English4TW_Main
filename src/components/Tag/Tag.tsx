@@ -10,9 +10,18 @@ import { Colors } from "styles";
 import ITag from "types/components/tag";
 /*
 [Tag] is touchable component
-disable means tag cannot be pressed if it's true. Ex:筆記內容頁
+disable means tag isn't clickable. Ex:筆記內容頁
 */
-const Tag: React.FC<ITag> = ({ title, onPress, onLongPress, onPressOut, onPressIn, customStyle, disable, isChoosed}) => {
+const Tag: React.FC<ITag> = ({
+  title,
+  onPress,
+  onLongPress,
+  onPressOut,
+  onPressIn,
+  customStyle,
+  disable,
+  isChoosed,
+}) => {
   const [status, setStatus] = React.useState({
     hover: false,
     // press: isChoosed || false,
@@ -24,39 +33,42 @@ const Tag: React.FC<ITag> = ({ title, onPress, onLongPress, onPressOut, onPressI
       accessibilityLabel={title}
       accessibilityHint={title}
       onPressIn={() => {
-        if(!disable) setStatus({ ...status, hover: true })
-        if(!disable && onPressIn) onPressIn()
+        if (!disable) setStatus({ ...status, hover: true });
+        if (!disable && onPressIn) onPressIn();
       }}
       onPressOut={() => {
-        if(!disable && onPressOut) onPressOut()
+        if (!disable && onPressOut) onPressOut();
       }}
       onLongPress={() => {
-        if(!disable && onLongPress) onLongPress()
-        if(!disable) setStatus({ ...status, hover: false })
+        if (!disable && onLongPress) {
+          setStatus({ ...status, hover: false });
+          onLongPress();
+        }
       }}
       onPress={() => {
-        if(!disable) setStatus({ ...status, hover: false });
-        if(!disable && onPress) onPress()
+        if (!disable) setStatus({ ...status, hover: false });
+        if (!disable && onPress) onPress();
       }}
       delayLongPress={750}
     >
       <View
         style={[
+          styles.tag,
           customStyle,
-          status.hover ? 
-            styles.isHover : 
-            isChoosed ? 
-              styles.isPress : 
-              styles.isDefault,
+          status.hover
+            ? styles.isHover
+            : isChoosed
+            ? styles.isPress
+            : styles.isDefault,
         ]}
       >
         <Text
           style={[
-            status.hover ? 
-              styles.whiteText: 
-              isChoosed ? 
-                styles.whiteText : 
-                styles.isDefaultText
+            status.hover
+              ? styles.whiteText
+              : isChoosed
+              ? styles.whiteText
+              : styles.isDefaultText,
           ]}
         >
           {title}
@@ -66,6 +78,10 @@ const Tag: React.FC<ITag> = ({ title, onPress, onLongPress, onPressOut, onPressI
   );
 };
 const styles = StyleSheet.create({
+  tag: {
+    paddingVertical: 3,
+    paddingHorizontal: 15,
+  },
   isPress: {
     backgroundColor: Colors.primary,
     borderColor: Colors.primary,

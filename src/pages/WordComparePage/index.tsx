@@ -150,8 +150,9 @@ const WordComparePage = () => {
           </View>
           <KeyboardAvoidingView
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 70}
               style={styles.container}>
-            <ScrollView contentInset={{top: 0, bottom: 60}} showsVerticalScrollIndicator={false} automaticallyAdjustContentInsets={false}>
+            <ScrollView contentInset={{top: 0}} showsVerticalScrollIndicator={false} automaticallyAdjustContentInsets={false}>
               {
                 isLoadingFirst || isLoadingSecond ? 
                   <View style={styles.centeredView}>

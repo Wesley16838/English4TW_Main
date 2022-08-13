@@ -10,20 +10,19 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import Button from "components/Button/Button";
 import ModalContainer from "components/Modal/Modal";
 import Images from "assets/images";
 import { DEVICE_WIDTH, DEVICE_HEIGHT } from "pages/SplashPage";
 import { Colors, Typography } from "styles";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { Dispatch } from "redux";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { setSetting } from "actions/setting";
 import { speedOptions } from "utils/constants";
 
 const SentenceExamplesPage = () => {
-  const navigation = useNavigation<StackNavigationProp<any>>();
+  const navigation = useNavigation();
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [sentences, setSentences] = useState([
     {
@@ -100,8 +99,8 @@ const SentenceExamplesPage = () => {
     },
   ]);
   const [modalVisible, setModalVisible] = useState(false);
-  const dispatch: Dispatch<any> = useDispatch()
-  const {speed}: any = useSelector(
+  const dispatch: Dispatch<any> = useDispatch();
+  const { speed }: any = useSelector(
     (state: any) => state.setting,
     shallowEqual
   );
@@ -177,7 +176,7 @@ const SentenceExamplesPage = () => {
       {
         translateY: animation.interpolate({
           inputRange: [0.01, 1],
-          outputRange: [0, -.93 * DEVICE_HEIGHT],
+          outputRange: [0, -0.93 * DEVICE_HEIGHT],
           extrapolate: "clamp",
         }),
       },
@@ -199,8 +198,8 @@ const SentenceExamplesPage = () => {
           onCancel={() => setModalVisible(false)}
           defaultValue={speed}
           onConfirm={(option: string) => {
-            dispatch(setSetting({speed: option}))
-            setModalVisible(false)
+            dispatch(setSetting({ speed: option }));
+            setModalVisible(false);
           }}
         />
       </Modal>
@@ -216,7 +215,7 @@ const SentenceExamplesPage = () => {
                 <Button
                   title=""
                   image={Images.icons.leftarrow_icon}
-                  buttonStyle={{height: 20, width: 12}}
+                  buttonStyle={{ height: 20, width: 12 }}
                   imageSize={{ height: 20, width: 12, marginRight: 0 }}
                   type=""
                   onPress={() => handleBack()}
@@ -224,7 +223,7 @@ const SentenceExamplesPage = () => {
                 <Button
                   title=""
                   image={Images.icons.rightarrow_disable_icon}
-                  buttonStyle={{height: 20, width: 12}}
+                  buttonStyle={{ height: 20, width: 12 }}
                   imageSize={{ height: 20, width: 12, marginRight: 0 }}
                   type=""
                   onPress={() => handleNext()}
@@ -233,15 +232,22 @@ const SentenceExamplesPage = () => {
               <Button
                 title=""
                 image={Images.icons.close_icon}
-                buttonStyle={{height: 30, width: 30}}
+                buttonStyle={{ height: 30, width: 30 }}
                 imageSize={{ height: 30, width: 30, marginRight: 0 }}
                 type=""
                 onPress={() => handleClose()}
               />
             </View>
-            <ScrollView contentInset={{top: 0}} showsVerticalScrollIndicator={false} automaticallyAdjustContentInsets={false}>
+            <ScrollView
+              contentInset={{ top: 0 }}
+              showsVerticalScrollIndicator={false}
+              automaticallyAdjustContentInsets={false}
+            >
               <View style={styles.topic}>
-                <Image style={styles.topicIcon} source={Images.icons.arrow_icon} />
+                <Image
+                  style={styles.topicIcon}
+                  source={Images.icons.arrow_icon}
+                />
                 <Text style={styles.topicTitle}> 例句 -</Text>
                 <TouchableOpacity onPress={() => setModalVisible(true)}>
                   <Image
@@ -251,7 +257,9 @@ const SentenceExamplesPage = () => {
                 </TouchableOpacity>
               </View>
               <Text style={styles.title}>(人) put a spin on (事)</Text>
-              <View style={{marginBottom: 90}}>{renderSentencesSection()}</View>
+              <View style={{ marginBottom: 90 }}>
+                {renderSentencesSection()}
+              </View>
             </ScrollView>
           </Animated.View>
         </View>

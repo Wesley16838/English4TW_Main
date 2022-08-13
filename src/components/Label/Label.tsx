@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Colors, Typography } from "styles";
 import ILabel from "types/components/label";
 /*
@@ -19,7 +15,7 @@ const Label: React.FC<ILabel> = ({ title, customStyle }) => {
 
 const styles = StyleSheet.create({
   container: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     paddingHorizontal: 14,
     paddingVertical: 3,
     color: Colors.primary,
