@@ -35,6 +35,7 @@ import * as Speech from "expo-speech";
 import Toast from "react-native-root-toast";
 import { getUserWords } from "services/word";
 import { levelOptions } from "utils/constants";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 const HomePage = () => {
   const [searchWord, setSearchWord] = useState("");
@@ -46,7 +47,7 @@ const HomePage = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const firstInput = React.createRef<TextInput>();
   const secondInput = React.createRef<TextInput>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const dispatch: Dispatch<any> = useDispatch();
   const { isLoggedIn }: any = useSelector(
     (state: any) => state.user,

@@ -40,10 +40,11 @@ import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { setSetting } from "actions/setting";
 import { Dispatch } from "redux";
 import { playOptions, speedOptions } from "utils/constants";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 //  setOnPlaybackStatusUpdate(({ shouldPlay, isLoaded }) => { ... })
 const NoteContentPage = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const route: RouteProp<{ params: { id: number } }, "params"> = useRoute();
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [time, setTime] = useState(0);

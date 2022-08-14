@@ -16,6 +16,7 @@ import {
   Switch,
   Modal,
   Alert,
+  ScrollView,
 } from "react-native";
 import { DEVICE_WIDTH } from "pages/SplashPage";
 import { Colors, Typography } from "styles";
@@ -72,6 +73,11 @@ const SettingPage = ({
             width: DEVICE_WIDTH,
           }}
         >
+          <ScrollView
+                contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
+                contentInset={{bottom: 70}}
+                showsVerticalScrollIndicator={false}
+              >
           <ProfileImage
             name={images.icons.default_profileimage}
             customStyle={{
@@ -225,6 +231,7 @@ const SettingPage = ({
               </>
             )}
           </View>
+          </ScrollView>
         </SafeAreaView>
       </LinearGradientLayout>
     </>
