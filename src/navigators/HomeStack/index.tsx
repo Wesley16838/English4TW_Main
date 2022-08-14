@@ -14,7 +14,7 @@ const forFade = ({ current }: { current: any }) => ({
   },
 });
 const HomeStackNavigator = () => {
-  const {isLoggedIn}: any = useSelector(
+  const { isLoggedIn }: any = useSelector(
     (state: any) => state.user,
     shallowEqual
   );
@@ -38,29 +38,37 @@ const HomeStackNavigator = () => {
         component={HomePage}
         options={{ animationEnabled: false, gestureEnabled: false }}
       />
-      {isLoggedIn && <HomeStack.Screen
-        name={"SentenceAnalysisPage"}
-        component={SentenceAnalysisPage}
-        options={{ cardStyleInterpolator: forFade, gestureEnabled: false }}
-      />}
-      {isLoggedIn && <HomeStack.Screen
-        name={"WordComparePage"}
-        component={WordComparePage}
-        options={{ cardStyleInterpolator: forFade, gestureEnabled: false }}
-        initialParams={{ first: "", second: "" }}
-      />}
-      {isLoggedIn && <HomeStack.Screen
-        name={"SentenceExamplesPage"}
-        component={SentenceExamplesPage}
-        options={{ cardStyleInterpolator: forFade, gestureEnabled: false }}
-        initialParams={{ sentence: "" }}
-      />}
-      {isLoggedIn && <HomeStack.Screen
-        name={"WordDetailPage"}
-        component={WordDetailPage}
-        options={{ animationEnabled: false, gestureEnabled: false }}
-        initialParams={{ word: "" }}
-      />}
+      {isLoggedIn && (
+        <HomeStack.Screen
+          name={"SentenceAnalysisPage"}
+          component={SentenceAnalysisPage}
+          options={{ cardStyleInterpolator: forFade, gestureEnabled: false }}
+        />
+      )}
+      {isLoggedIn && (
+        <HomeStack.Screen
+          name={"WordComparePage"}
+          component={WordComparePage}
+          options={{ cardStyleInterpolator: forFade, gestureEnabled: false }}
+          initialParams={{ first: "", second: "" }}
+        />
+      )}
+      {isLoggedIn && (
+        <HomeStack.Screen
+          name={"SentenceExamplesPage"}
+          component={SentenceExamplesPage}
+          options={{ cardStyleInterpolator: forFade, gestureEnabled: false }}
+          initialParams={{ sentence: "" }}
+        />
+      )}
+      {isLoggedIn && (
+        <HomeStack.Screen
+          name={"WordDetailPage"}
+          component={WordDetailPage}
+          options={{ animationEnabled: false, gestureEnabled: false }}
+          initialParams={{ word: "" }}
+        />
+      )}
     </HomeStack.Navigator>
   );
 };

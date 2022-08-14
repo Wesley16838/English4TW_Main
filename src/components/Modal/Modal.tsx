@@ -1,10 +1,4 @@
-import {
-  View,
-  StyleSheet,
-  Text,
-  Image,
-  TouchableOpacity,
-} from "react-native";
+import { View, StyleSheet, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import Images from "assets/images";
 import { BlurView } from "expo-blur";
@@ -21,20 +15,11 @@ const Modal: React.FC<IModal> = ({
   content,
   confirmString,
   children,
-  defaultValue
+  defaultValue,
 }) => {
-  // const {speed, level, play_paragraph, sort}: any = useSelector(
-  //   (state: any) => state.setting,
-  //   shallowEqual
-  // );
-  // let val:any = {
-  //   "播放段落": play_paragraph,
-  //   "播放速度": speed,
-  //   "字彙難度": level,
-  //   "排序": sort
-  // }
-
-  const [selected, setSelected] = React.useState((content && defaultValue) || "");
+  const [selected, setSelected] = React.useState(
+    (content && defaultValue) || ""
+  );
   const onCheck = (option: string) => {
     setSelected(option);
   };
@@ -70,13 +55,9 @@ const Modal: React.FC<IModal> = ({
       style={[StyleSheet.absoluteFill, styles.nonBlurredContent]}
     >
       <View style={styles.modalContainer}>
-        <Text
-          style={styles.modalTitle}
-        >
-          {title}
-        </Text>
-        { subtitle && <Text style={styles.modalContent}>{subtitle}</Text> }
-        { children ? <View>{children}</View> : <View>{renderOption()}</View> }
+        <Text style={styles.modalTitle}>{title}</Text>
+        {subtitle && <Text style={styles.modalContent}>{subtitle}</Text>}
+        {children ? <View>{children}</View> : <View>{renderOption()}</View>}
         <View style={styles.buttonWrapper}>
           <TouchableOpacity
             onPress={() => handleOnCancel()}
@@ -84,10 +65,12 @@ const Modal: React.FC<IModal> = ({
           >
             <Text style={Typography.base_primary}>取消</Text>
           </TouchableOpacity>
-          <View style={{
-             borderLeftWidth: 0.5,
-             borderLeftColor: Colors.modal_line,
-          }}/>
+          <View
+            style={{
+              borderLeftWidth: 0.5,
+              borderLeftColor: Colors.modal_line,
+            }}
+          />
           <TouchableOpacity
             onPress={() => handleOnConfirm()}
             style={styles.button}
@@ -137,7 +120,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
     marginHorizontal: 20,
-    ...Typography.base_bold_secondary
+    ...Typography.base_bold_secondary,
   },
   button: {
     width: 135,
@@ -146,7 +129,7 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
   },
   buttonWrapper: {
-    width: "100%", 
+    width: "100%",
     flexDirection: "row",
     borderTopWidth: 0.5,
     borderTopColor: Colors.modal_line,

@@ -28,7 +28,7 @@ const CommentItem: React.FC<IComment> = ({ name, date, content, index }) => {
   );
 };
 const ReviewPage = ({ navigation }: { navigation: any }) => {
-  const [textVal, setTextVal] = useState("")
+  const [textVal, setTextVal] = useState("");
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [reviews, setReviews] = useState(["1"]);
   const handleBack = () => {
@@ -39,7 +39,7 @@ const ReviewPage = ({ navigation }: { navigation: any }) => {
     }).start();
     navigation.goBack();
   };
-  const handleOnClick = () => {}
+  const handleOnClick = () => {};
   return (
     <View style={{ flexDirection: "column", alignItems: "center" }}>
       <View
@@ -55,18 +55,14 @@ const ReviewPage = ({ navigation }: { navigation: any }) => {
           <Button
             title=""
             image={images.icons.leftarrow_icon}
-            buttonStyle={{height: 20, width: 12}}
+            buttonStyle={{ height: 20, width: 12 }}
             imageSize={{ height: 20, width: 12, marginRight: 0 }}
             type=""
             onPress={() => handleBack()}
           />
         </View>
 
-        <Text
-          style={ Typography.pageTitle as TextStyle }
-        >
-          意見回饋
-        </Text>
+        <Text style={Typography.pageTitle as TextStyle}>意見回饋</Text>
         <View style={{ flex: 1 }} />
       </View>
       <TextArea
@@ -181,7 +177,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 18,
-    borderColor:Colors.primary,
+    borderColor: Colors.primary,
     borderWidth: 1,
     backgroundColor: Colors.white,
   },
@@ -204,7 +200,7 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   date: {
-    ...Typography.base_secondary
+    ...Typography.base_secondary,
   },
   content: {
     fontSize: 16,

@@ -4,13 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "components/Button/Button";
 import { Colors, Typography } from "styles";
 import images from "assets/images";
-import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  TextStyle,
-} from "react-native";
+import { StyleSheet, Text, View, FlatList, TextStyle } from "react-native";
 import { DEVICE_WIDTH } from "pages/SplashPage";
 import { IOrder } from "types/pages/orders";
 import LinearGradientLayout from "components/LinearGradientLayout";
@@ -60,18 +54,14 @@ const OrderhHistoryPage = ({
             <Button
               title=""
               image={images.icons.leftarrow_icon}
-              buttonStyle={{height: 20, width: 12}}
+              buttonStyle={{ height: 20, width: 12 }}
               imageSize={{ height: 20, width: 12, marginRight: 0 }}
               type=""
               onPress={() => handleBack()}
             />
           </View>
 
-          <Text
-            style={ Typography.pageTitle as TextStyle }
-          >
-            訂單記錄
-          </Text>
+          <Text style={Typography.pageTitle as TextStyle}>訂單記錄</Text>
           <View style={{ flex: 1, alignItems: "flex-end" }} />
         </View>
         <FlatList
@@ -185,7 +175,7 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   date: {
-    ...Typography.base_secondary
+    ...Typography.base_secondary,
   },
   content: {
     fontSize: 16,

@@ -22,63 +22,68 @@ export type Props = {
   value: string;
   isDisabled?: boolean;
 };
-const TextArea = forwardRef<TextInput, Props>(({
-  OnChangeText,
-  OnClick,
-  customStyle,
-  placeHolder,
-  placeHolderTextColor,
-  limit,
-  value,
-  isDisabled,
-  button,
-  buttonStyle
-}, ref) => {
-  const [textNumber, setTextNumber] = React.useState(0);
-  const localRef = useRef(null);
-  const inputRef = ref || localRef;
-  const handleOnSubmit = () => {
-    if(OnClick) OnClick()
-  };
-  const heightTop = customStyle.height - 46;
-  return (
-    <View style={[styles.textAreaSection, customStyle]}>
-      <TextInput
-        returnKeyType="done"
-        blurOnSubmit={true}
-        multiline={true}
-        textAlignVertical="top"
-        numberOfLines={5}
-        style={{
-          height: heightTop,
-          width: "100%",
-          paddingTop: 10,
-          paddingHorizontal: 15,
-        }}
-        placeholder={placeHolder}
-        onChangeText={(str) => {
-          if (str.length > limit) return false;
-          setTextNumber(str.length)
-          if(OnChangeText) OnChangeText(str)
-        }}
-        onSubmitEditing={() => handleOnSubmit()}
-        underlineColorAndroid="transparent"
-        placeholderTextColor={placeHolderTextColor}
-        keyboardType="default"
-        value={value}
-        autoCorrect={false}
-        editable={!isDisabled}
-        selectTextOnFocus={!isDisabled}
-        ref={inputRef}
-      />
-      <View style={styles.textAreaBottom}>
-        <Text style={styles.textAreaText}>
-          {textNumber}/{limit}
-        </Text>
+const TextArea = forwardRef<TextInput, Props>(
+  (
+    {
+      OnChangeText,
+      OnClick,
+      customStyle,
+      placeHolder,
+      placeHolderTextColor,
+      limit,
+      value,
+      isDisabled,
+      button,
+      buttonStyle,
+    },
+    ref
+  ) => {
+    const [textNumber, setTextNumber] = React.useState(0);
+    const localRef = useRef(null);
+    const inputRef = ref || localRef;
+    const handleOnSubmit = () => {
+      if (OnClick) OnClick();
+    };
+    const heightTop = customStyle.height - 46;
+    return (
+      <View style={[styles.textAreaSection, customStyle]}>
+        <TextInput
+          returnKeyType="done"
+          blurOnSubmit={true}
+          multiline={true}
+          textAlignVertical="top"
+          numberOfLines={5}
+          style={{
+            height: heightTop,
+            width: "100%",
+            paddingTop: 10,
+            paddingHorizontal: 15,
+          }}
+          placeholder={placeHolder}
+          onChangeText={(str) => {
+            if (str.length > limit) return false;
+            setTextNumber(str.length);
+            if (OnChangeText) OnChangeText(str);
+          }}
+          onSubmitEditing={() => handleOnSubmit()}
+          underlineColorAndroid="transparent"
+          placeholderTextColor={placeHolderTextColor}
+          keyboardType="default"
+          value={value}
+          autoCorrect={false}
+          editable={!isDisabled}
+          selectTextOnFocus={!isDisabled}
+          ref={inputRef}
+        />
+        <View style={styles.textAreaBottom}>
+          <Text style={styles.textAreaText}>
+            {textNumber}/{limit}
+          </Text>
+        </View>
       </View>
-    </View>
-  );
-});
+    );
+  }
+);
 const styles = StyleSheet.create({
   textAreaSection: {
     height: 150,

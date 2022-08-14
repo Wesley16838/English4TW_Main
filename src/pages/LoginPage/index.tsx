@@ -19,6 +19,7 @@ import images from "assets/images";
 import {
   setFaceBookLogin,
   setFaceBookLoginSuccess,
+  setFaceBookLoginFail,
   setUserLogin,
   setUserLoginFail,
 } from "actions/user";
@@ -66,7 +67,7 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
       }
     } catch ({ message }) {
       alert(`Facebook Login Error: ${message}`);
-      dispatch(setFacebookLoginFail(message));
+      dispatch(setFaceBookLoginFail(message));
     }
   };
 
@@ -379,6 +380,3 @@ const styles = StyleSheet.create({
 });
 
 export default LoginPage;
-function setFacebookLoginFail(message: unknown): any {
-  throw new Error("Function not implemented.");
-}

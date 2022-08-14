@@ -30,9 +30,7 @@ const SplashPage = ({ navigation }: { navigation: any }) => {
   return (
     <View style={styles.splashContainer}>
       <Image style={styles.splashImage} source={Images.icons.logo_icon} />
-      <Text style={{  }}>
-        版本資訊：5.8.7
-      </Text>
+      <Text style={{}}>版本資訊：5.8.7</Text>
     </View>
   );
 };
@@ -57,6 +55,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 85,
     zIndex: 11,
-  }
+  },
 });
 export default SplashPage;

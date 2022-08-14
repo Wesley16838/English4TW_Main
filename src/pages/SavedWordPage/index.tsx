@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Button from "components/Button/Button";
 import ModalContainer from "components/Modal/Modal";
 import images from "assets/images";
-import * as Speech from 'expo-speech';
+import * as Speech from "expo-speech";
 import Card from "components/Card/Card";
 import { DEVICE_WIDTH } from "pages/SplashPage";
 import { SItem } from "types/pages/note";
@@ -34,11 +34,17 @@ import { Dispatch } from "redux";
 import { setSetting } from "actions/setting";
 import { sortOptions } from "utils/constants";
 interface IPinPush {
-  id: number,
-  pinned: number
+  id: number;
+  pinned: number;
 }
 
-const SavedItem: React.FC<SItem> = ({ title, detail, buttons, OnClick, OnCompare }) => {
+const SavedItem: React.FC<SItem> = ({
+  title,
+  detail,
+  buttons,
+  OnClick,
+  OnCompare,
+}) => {
   return (
     <Card
       title={title}
@@ -53,14 +59,14 @@ const SavedItem: React.FC<SItem> = ({ title, detail, buttons, OnClick, OnCompare
 
 // { word: "test1", detail: "A test1", speech: "v. 動詞", subtitle: "可數與不可數 --" }
 const SavedWordPage = ({ navigation }: { navigation: any }) => {
-  const choices = ["最近", "最早", "A - Z", "Z - A", "詞性"]
+  const choices = ["最近", "最早", "A - Z", "Z - A", "詞性"];
   const [selected, setSelected] = useState((choices && choices[0]) || "");
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [modalVisible, setModalVisible] = useState(false);
-  const dispatch: Dispatch<any> = useDispatch()
-  const queryClient = useQueryClient()
+  const dispatch: Dispatch<any> = useDispatch();
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
-  const {isLoggedIn}: any = useSelector(
+  const { isLoggedIn }: any = useSelector(
     (state: any) => state.user,
     shallowEqual
   );
@@ -74,108 +80,118 @@ const SavedWordPage = ({ navigation }: { navigation: any }) => {
   };
 
   const onSuccessFetchSavedWords = (data: any) => {
-    if(data==='Unauthorized'){
-
+    if (data === "Unauthorized") {
     } else {
-
     }
-    
-  }
-  const onErrorFetchSavedWords = (data: any) => {}
-  const {data, isLoading, error, isError, refetch} = getSavedWords([], onSuccessFetchSavedWords, onErrorFetchSavedWords,{
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-  })
+  };
+  const onErrorFetchSavedWords = (data: any) => {};
+  const { data, isLoading, error, isError, refetch } = getSavedWords(
+    [],
+    onSuccessFetchSavedWords,
+    onErrorFetchSavedWords,
+    {
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+    }
+  );
 
- useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
-      refetch()
+      refetch();
     }, [])
-  )
+  );
 
   const handleOnWordPlay = (str: string) => {
     Speech.speak(str);
-  }
-   
-  const {mutate:handleOnPushPinClick } = useMutation(
-    async({id, pinned}: IPinPush) => {
-      try{
+  };
+
+  const { mutate: handleOnPushPinClick } = useMutation(
+    async ({ id, pinned }: IPinPush) => {
+      try {
         let token = null;
         const result = await authDeviceStorage.getItem("JWT_TOKEN");
-        if(result) token = JSON.parse(result).token
-        const res = await api.post(`api/toggleUserWordPinned`, { word_id: id} ,{ 
-          headers: {
-            "Authorization" : `Bearer ${token}`,
-            "content-type" : "application/json"
+        if (result) token = JSON.parse(result).token;
+        const res = await api.post(
+          `api/toggleUserWordPinned`,
+          { word_id: id },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "content-type": "application/json",
+            },
           }
-        })
-        return {id, pinned}
-      }catch(err){
-        console.log(err)
+        );
+        return { id, pinned };
+      } catch (err) {
+        console.log(err);
       }
     },
     {
       onSuccess: (data: any) => {
-        const {id, pinned} = data
-        queryClient.setQueryData('saved_words', (prev: any) => {
-          const newArr = prev.map((item:any) => {
-            if(item.id === id){
+        const { id, pinned } = data;
+        queryClient.setQueryData("saved_words", (prev: any) => {
+          const newArr = prev.map((item: any) => {
+            if (item.id === id) {
               return {
                 ...item,
-                pinned: pinned === 1 ? 0 : 1
-              }
+                pinned: pinned === 1 ? 0 : 1,
+              };
             } else {
-              return item
+              return item;
             }
-          })
+          });
           return newArr;
-        })
-      }
+        });
+      },
     }
-  )
+  );
 
-  const {mutate:handleOnDeletedWord} = useMutation(
-    async(id: number) => {
-      try{
+  const { mutate: handleOnDeletedWord } = useMutation(
+    async (id: number) => {
+      try {
         let token = null;
         const result = await authDeviceStorage.getItem("JWT_TOKEN");
-        if(result) token = JSON.parse(result).token
-        const res = await api.post(`api/deleteUserWord`, { word_id: id} ,{ 
-          headers: {
-            "Authorization" : `Bearer ${token}`,
-            "content-type" : "application/json"
+        if (result) token = JSON.parse(result).token;
+        const res = await api.post(
+          `api/deleteUserWord`,
+          { word_id: id },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "content-type": "application/json",
+            },
           }
-        })
+        );
 
-        return id
-      }catch(err){
-        console.log(err)
+        return id;
+      } catch (err) {
+        console.log(err);
       }
     },
     {
       onSuccess: (word_id) => {
-        queryClient.setQueryData('saved_words', (prev: any) => {
-          const newArr = prev.filter((data:any) => data.id !== word_id)
+        queryClient.setQueryData("saved_words", (prev: any) => {
+          const newArr = prev.filter((data: any) => data.id !== word_id);
           return newArr;
-        })
-      }
+        });
+      },
     }
-  )
+  );
 
   const handleOnWordCompare = (str: string) => {
     navigation.push("WordComparePage", {
-      first: str
+      first: str,
     });
   };
 
-  const handleOnWordClick = async(str: string) => {
-    const result = await AsyncStorage.getItem('@word_history')
-      navigation.push("WordDetailPage", {
-        word: str,
-        history: result ? result : '[]'
-      });
-  }
-  const {sort}: any = useSelector(
+  const handleOnWordClick = async (str: string) => {
+    const result = await AsyncStorage.getItem("@word_history");
+    navigation.push("WordDetailPage", {
+      word: str,
+      history: result ? result : "[]",
+    });
+  };
+  const { sort }: any = useSelector(
     (state: any) => state.setting,
     shallowEqual
   );
@@ -196,8 +212,8 @@ const SavedWordPage = ({ navigation }: { navigation: any }) => {
           onCancel={() => setModalVisible(!modalVisible)}
           defaultValue={sort}
           onConfirm={(option: string) => {
-            dispatch(setSetting({sort: option}))
-            setModalVisible(!modalVisible)
+            dispatch(setSetting({ sort: option }));
+            setModalVisible(!modalVisible);
           }}
         />
       </Modal>
@@ -214,27 +230,21 @@ const SavedWordPage = ({ navigation }: { navigation: any }) => {
           <View
             style={{
               flexDirection: "row",
-              paddingHorizontal: 20
+              paddingHorizontal: 20,
             }}
           >
-            <View
-              style={{ flex: 1, alignItems: "flex-start" }}
-            >
+            <View style={{ flex: 1, alignItems: "flex-start" }}>
               <Button
                 title=""
                 image={images.icons.leftarrow_icon}
-                buttonStyle={{height: 20, width: 12}}
+                buttonStyle={{ height: 20, width: 12 }}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleBack()}
               />
             </View>
 
-            <Text
-              style={ Typography.pageTitle as TextStyle }
-            >
-              儲存字彙
-            </Text>
+            <Text style={Typography.pageTitle as TextStyle}>儲存字彙</Text>
             <View style={{ flex: 1, alignItems: "flex-end" }}>
               <TouchableOpacity
                 onPress={() => {
@@ -249,8 +259,9 @@ const SavedWordPage = ({ navigation }: { navigation: any }) => {
               </TouchableOpacity>
             </View>
           </View>
-          { isLoading ? <ActivityIndicator size="large" /> : 
-          data === 'Unauthorized' ? 
+          {isLoading ? (
+            <ActivityIndicator size="large" />
+          ) : data === "Unauthorized" ? (
             <View
               style={{
                 flex: 1,
@@ -264,11 +275,9 @@ const SavedWordPage = ({ navigation }: { navigation: any }) => {
                 style={styles.imagefavstyle}
                 source={images.icons.non_favorite_icon}
               />
-              <Text style={{ color: Colors.gray_4 }}>
-                尚未登入
-              </Text>
+              <Text style={{ color: Colors.gray_4 }}>尚未登入</Text>
             </View>
-              : data.length === 0 ? (
+          ) : data.length === 0 ? (
             <View
               style={{
                 flex: 1,
@@ -282,55 +291,60 @@ const SavedWordPage = ({ navigation }: { navigation: any }) => {
                 style={styles.imagefavstyle}
                 source={images.icons.non_favorite_icon}
               />
-              <Text style={{ color: Colors.gray_4 }}>
-                尚未儲存字彙
-              </Text>
+              <Text style={{ color: Colors.gray_4 }}>尚未儲存字彙</Text>
             </View>
           ) : (
-              <View
-                style={{ width: "100%", paddingHorizontal: 20, marginTop: 30 }}
-              >
-                <FlatList
-                  contentContainerStyle={{
-                    flexGrow: 1,
-                  }}
-                  showsVerticalScrollIndicator={false}
-                  data={data}
-                  renderItem={({ item, index }) => (
-                    <SavedItem
-                      key={index}
-                      title={item.word}
-                      detail={item.def}
-                      buttons={[
-                        {
-                          name: 'volumn',
-                          path: images.icons.volume_icon,
-                          onClick: () => handleOnWordPlay(item.word)
-                        },
-                        {
-                          name: 'favorite',
-                          path: images.icons.favorited_icon,
-                          onClick: () => handleOnDeletedWord(parseInt(item.id))
-                        },
-                        {
-                          name: 'pushpin',
-                          path: item.pinned === 1 ? images.icons.push_pin_selected_icon : images.icons.push_pin_icon,
-                          onClick: () =>  handleOnPushPinClick({id: parseInt(item.id), pinned: item.pinned})
-                        },
-                        {
-                          name: 'compare',
-                          path: images.icons.compare_icon,
-                          onClick: () =>  handleOnWordCompare(item.word)
-                        },
-                      ]}
-                      OnClick={() => handleOnWordClick(item.word)}
-                      OnCompare={() => handleOnWordCompare(item.word)}
-                    />
-                  )}
-                  keyExtractor={(item, index) => index.toString()}
-                />
-              </View>
-            )}
+            <View
+              style={{ width: "100%", paddingHorizontal: 20, marginTop: 30 }}
+            >
+              <FlatList
+                contentContainerStyle={{
+                  flexGrow: 1,
+                }}
+                showsVerticalScrollIndicator={false}
+                data={data}
+                renderItem={({ item, index }) => (
+                  <SavedItem
+                    key={index}
+                    title={item.word}
+                    detail={item.def}
+                    buttons={[
+                      {
+                        name: "volumn",
+                        path: images.icons.volume_icon,
+                        onClick: () => handleOnWordPlay(item.word),
+                      },
+                      {
+                        name: "favorite",
+                        path: images.icons.favorited_icon,
+                        onClick: () => handleOnDeletedWord(parseInt(item.id)),
+                      },
+                      {
+                        name: "pushpin",
+                        path:
+                          item.pinned === 1
+                            ? images.icons.push_pin_selected_icon
+                            : images.icons.push_pin_icon,
+                        onClick: () =>
+                          handleOnPushPinClick({
+                            id: parseInt(item.id),
+                            pinned: item.pinned,
+                          }),
+                      },
+                      {
+                        name: "compare",
+                        path: images.icons.compare_icon,
+                        onClick: () => handleOnWordCompare(item.word),
+                      },
+                    ]}
+                    OnClick={() => handleOnWordClick(item.word)}
+                    OnCompare={() => handleOnWordCompare(item.word)}
+                  />
+                )}
+                keyExtractor={(item, index) => index.toString()}
+              />
+            </View>
+          )}
         </SafeAreaView>
       </LinearGradientLayout>
     </>

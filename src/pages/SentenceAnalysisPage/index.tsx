@@ -18,38 +18,46 @@ import { Dispatch } from "redux";
 import { Colors, Typography } from "styles";
 import { useMutation, useQuery } from "react-query";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import * as Speech from 'expo-speech';
+import * as Speech from "expo-speech";
 import api from "services/api";
 import authDeviceStorage from "services/authDeviceStorage";
 const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
   const dispatch: Dispatch<any> = useDispatch();
-  const route: RouteProp<{ params: { sentence: string } }, 'params'> = useRoute();
+  const route: RouteProp<
+    { params: { sentence: string } },
+    "params"
+  > = useRoute();
   const { sentence } = route.params;
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [analysis, setAnalysis] = useState([]);
-  
+
   const { mutate, isLoading } = useMutation(
-    async() => {
-      try{
+    async () => {
+      try {
         let token = null;
         const result = await authDeviceStorage.getItem("JWT_TOKEN");
-        if(result) token = JSON.parse(result).token
-        const res_analysis: any = await api.post(`api/analyze`, {"ori_sentence":sentence},{ 
-          headers: {
-            "Authorization" : `Bearer ${token}`,
-            "content-type" : "application/json"
+        if (result) token = JSON.parse(result).token;
+        const res_analysis: any = await api.post(
+          `api/analyze`,
+          { ori_sentence: sentence },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "content-type": "application/json",
+            },
           }
-        })
-        if(res_analysis.data.message === 'Unauthorized') throw new Error('Unauthorized')
-       return res_analysis.data.data.output
-      } catch(err){
-        console.log(err)
+        );
+        if (res_analysis.data.message === "Unauthorized")
+          throw new Error("Unauthorized");
+        return res_analysis.data.data.output;
+      } catch (err) {
+        console.log(err);
       }
     },
     {
-      onSuccess: (data) => setAnalysis(data)
+      onSuccess: (data) => setAnalysis(data),
     }
-  )
+  );
 
   const backdrop = {
     transform: [
@@ -68,7 +76,7 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
     }),
   };
 
-  useEffect(() => mutate() ,[sentence])
+  useEffect(() => mutate(), [sentence]);
 
   React.useEffect(() => {
     Animated.timing(animation, {
@@ -154,7 +162,7 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
       {
         translateY: animation.interpolate({
           inputRange: [0.01, 1],
-          outputRange: [0, -.93 * DEVICE_HEIGHT],
+          outputRange: [0, -0.93 * DEVICE_HEIGHT],
           extrapolate: "clamp",
         }),
       },
@@ -163,7 +171,7 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
 
   const handleOnWordPlay = (str: string) => {
     Speech.speak(str);
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -177,7 +185,7 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
               <Button
                 title=""
                 image={Images.icons.leftarrow_icon}
-                buttonStyle={{height: 20, width: 12}}
+                buttonStyle={{ height: 20, width: 12 }}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleBack()}
@@ -185,7 +193,7 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
               <Button
                 title=""
                 image={Images.icons.rightarrow_disable_icon}
-                buttonStyle={{height: 20, width: 12}}
+                buttonStyle={{ height: 20, width: 12 }}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
                 onPress={() => handleNext()}
@@ -194,13 +202,17 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
             <Button
               title=""
               image={Images.icons.close_icon}
-              buttonStyle={{height: 30, width: 30}}
+              buttonStyle={{ height: 30, width: 30 }}
               imageSize={{ height: 30, width: 30, marginRight: 0 }}
               type=""
               onPress={() => handleClose()}
             />
           </View>
-          <ScrollView contentInset={{bottom: 15, top: 0}} showsVerticalScrollIndicator={false} automaticallyAdjustContentInsets={false}>
+          <ScrollView
+            contentInset={{ bottom: 15, top: 0 }}
+            showsVerticalScrollIndicator={false}
+            automaticallyAdjustContentInsets={false}
+          >
             <View style={styles.content}>
               <View style={styles.topic}>
                 <Image
@@ -224,7 +236,9 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
                   flexDirection: "row",
                 }}
               >
-                <TouchableWithoutFeedback onPress={() => handleOnWordPlay(sentence)}>
+                <TouchableWithoutFeedback
+                  onPress={() => handleOnWordPlay(sentence)}
+                >
                   <Image
                     source={Images.icons.volume_icon}
                     style={{ width: 30, height: 30 }}
@@ -251,22 +265,28 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
                 />
                 <Text style={styles.topicTitle}> 解析 -</Text>
               </View>
-              {isLoading ?  
-                <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
-                  <ActivityIndicator size="large" />
-                </View>  :
+              {isLoading ? (
                 <View
-                style={{
-                  flex: 1,
-                  marginBottom: 30,
-                  flexDirection: "column",
-                  flexWrap: "wrap",
-                }}
+                  style={{
+                    flex: 1,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <ActivityIndicator size="large" />
+                </View>
+              ) : (
+                <View
+                  style={{
+                    flex: 1,
+                    marginBottom: 30,
+                    flexDirection: "column",
+                    flexWrap: "wrap",
+                  }}
                 >
                   {renderAnalysisSection()}
-                </View>  
-              }
-              
+                </View>
+              )}
             </View>
           </ScrollView>
         </Animated.View>
@@ -297,7 +317,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   topicTitle: {
-    ...Typography.base_bold
+    ...Typography.base_bold,
   },
   topicIcon: {
     height: 16,
@@ -330,7 +350,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.gray_4,
     borderBottomWidth: 0.5,
     marginHorizontal: 20,
-    marginTop: 30
+    marginTop: 30,
   },
   content_analysis: {
     marginTop: 30,

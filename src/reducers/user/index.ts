@@ -53,7 +53,7 @@ const user = (state: any = initialState, action: any): any => {
         isLoggedIn: false,
         error: null,
       };
-      case actionTypes.SET_FACEBOOK_LOGOUT:
+    case actionTypes.SET_FACEBOOK_LOGOUT:
       return {
         ...state,
         users: null,

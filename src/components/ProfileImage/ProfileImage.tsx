@@ -10,11 +10,7 @@ export type Props = {
   name: any;
   customStyle: any;
 };
-const ProfileImage: React.FC<Props> = ({
-  name,
-  customStyle,
-}) => {
-
+const ProfileImage: React.FC<Props> = ({ name, customStyle }) => {
   return (
     <Image
       style={[
@@ -22,7 +18,7 @@ const ProfileImage: React.FC<Props> = ({
         styles.profileimage,
         // { resizeMode: Platform.OS === "ios" ? "contain" : "cover" },
       ]}
-      source={typeof name === 'string' ? { uri: name } : name}
+      source={typeof name === "string" ? { uri: name } : name}
     />
   );
 };
@@ -30,7 +26,7 @@ const styles = StyleSheet.create({
   profileimage: {
     borderWidth: 2,
     borderColor: "#CCCCCC",
-    resizeMode: 'cover'
+    resizeMode: "cover",
   },
 });
 export default ProfileImage;

@@ -7,7 +7,7 @@ import { shallowEqual, useSelector } from "react-redux";
 const NoteStack = createStackNavigator();
 
 const NoteStackNavigator = () => {
-  const {isLoggedIn}: any = useSelector(
+  const { isLoggedIn }: any = useSelector(
     (state: any) => state.user,
     shallowEqual
   );
@@ -23,17 +23,21 @@ const NoteStackNavigator = () => {
         component={NotePage}
         options={{ animationEnabled: false, gestureEnabled: false }}
       />
-      {isLoggedIn && <NoteStack.Screen
-        name={"NewNotePage"}
-        component={NewNotePage}
-        options={{ animationEnabled: false, gestureEnabled: false }}
-        initialParams={{ title: "" }}
-      />}
-      {isLoggedIn && <NoteStack.Screen
-        name={"NoteContentPage"}
-        component={NoteContentPage}
-        options={{ animationEnabled: false, gestureEnabled: false }}
-      />}
+      {isLoggedIn && (
+        <NoteStack.Screen
+          name={"NewNotePage"}
+          component={NewNotePage}
+          options={{ animationEnabled: false, gestureEnabled: false }}
+          initialParams={{ title: "" }}
+        />
+      )}
+      {isLoggedIn && (
+        <NoteStack.Screen
+          name={"NoteContentPage"}
+          component={NoteContentPage}
+          options={{ animationEnabled: false, gestureEnabled: false }}
+        />
+      )}
     </NoteStack.Navigator>
   );
 };

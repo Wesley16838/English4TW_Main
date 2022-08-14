@@ -13,11 +13,11 @@ import { shallowEqual, useSelector } from "react-redux";
 const SettingStack = createStackNavigator();
 
 const SettingStackNavigator = () => {
-  const {isLoggedIn}: any = useSelector(
+  const { isLoggedIn }: any = useSelector(
     (state: any) => state.user,
     shallowEqual
   );
-  const forFade = ({ current }: {current: any}) => ({
+  const forFade = ({ current }: { current: any }) => ({
     cardStyle: {
       opacity: current.progress,
     },
@@ -34,11 +34,13 @@ const SettingStackNavigator = () => {
         component={SettingPage}
         options={{ animationEnabled: false, gestureEnabled: false }}
       />
-      {!isLoggedIn && <SettingStack.Screen
-        name={"LoginPage"}
-        component={LoginPage}
-        options={{ gestureEnabled: false, cardStyleInterpolator: forFade}}
-      />}
+      {!isLoggedIn && (
+        <SettingStack.Screen
+          name={"LoginPage"}
+          component={LoginPage}
+          options={{ gestureEnabled: false, cardStyleInterpolator: forFade }}
+        />
+      )}
       <SettingStack.Screen
         name={"CreateAccountPage"}
         component={CreateAccountPage}

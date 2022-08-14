@@ -1,3 +1,3 @@
 export default interface IWordList {
-    data:string[],
-};
+  data: string[];
+}

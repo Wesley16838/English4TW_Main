@@ -1,7 +1,7 @@
 export interface IActions {
-    name: string,
-    func: ()=> void
-};
+  name: string;
+  func: () => void;
+}
 export interface IActionButton {
-    options: IActions[]
-};
+  options: IActions[];
+}

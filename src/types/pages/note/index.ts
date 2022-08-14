@@ -1,7 +1,7 @@
 export type NItem = {
   word: string;
   index: number;
-  id: number
+  id: number;
 };
 
 export type SItem = {
@@ -10,6 +10,6 @@ export type SItem = {
   speech?: string;
   detail: string;
   buttons: any;
-  OnClick:()=>void;
-  OnCompare?:()=>void;
+  OnClick: () => void;
+  OnCompare?: () => void;
 };

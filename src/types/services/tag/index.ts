@@ -1,4 +1,4 @@
 export interface ITag {
-    onHandleSuccess?: (data: any) => void, 
-    onHandleError?: () => void
+  onHandleSuccess?: (data: any) => void;
+  onHandleError?: () => void;
 }

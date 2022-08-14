@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Colors, Typography } from "styles";
 import { ITabview } from "types/components/tabview";
 
@@ -15,20 +11,23 @@ const TabView: React.FC<ITabview> = ({ titles, customStyle, children }) => {
       titles.map((item, idx) => {
         return (
           <View
-            key={item+idx}
-            style={[styles.container, 
+            key={item + idx}
+            style={[
+              styles.container,
               {
-                borderColor: index === idx ? Colors.primary : Colors.transparent,
+                borderColor:
+                  index === idx ? Colors.primary : Colors.transparent,
                 borderWidth: index === idx ? 0.5 : 0,
-              }
+              },
             ]}
             onTouchEnd={() => setIndex(idx)}
           >
             <Text
-              style={[styles.title,
+              style={[
+                styles.title,
                 {
                   color: index === idx ? Colors.primary : Colors.primary_light,
-                }
+                },
               ]}
             >
               {item}
@@ -45,16 +44,16 @@ const TabView: React.FC<ITabview> = ({ titles, customStyle, children }) => {
   };
   return (
     <>
-      {
-        children.length > 1 ? 
+      {children.length > 1 ? (
         <View style={[customStyle]}>
           <View style={{ flexDirection: "row", marginBottom: 20 }}>
             {renderTab()}
           </View>
           <View>{renderBody()}</View>
-        </View> : 
+        </View>
+      ) : (
         renderBody()
-      }
+      )}
     </>
   );
 };
@@ -71,11 +70,11 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
-  title:{
+  title: {
     ...Typography.base,
     textAlign: "center",
     lineHeight: 25,
-  }
+  },
 });
 
 export default TabView;

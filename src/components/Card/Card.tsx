@@ -17,7 +17,7 @@ const printImage = (array: ICardButton[]) => {
     return (
       <TouchableWithoutFeedback
         onPress={() => {
-          item.onClick()
+          item.onClick();
         }}
         key={index}
       >
@@ -25,9 +25,8 @@ const printImage = (array: ICardButton[]) => {
           key={index}
           source={item.path}
           style={{ width: 30, height: 30, marginLeft: 10 }}
-        />  
+        />
       </TouchableWithoutFeedback>
-      
     );
   });
 };
@@ -44,19 +43,29 @@ const Card: React.FC<ICard> = ({
   return (
     <TouchableWithoutFeedback>
       <View style={[styles.cardContainer, customStyle]}>
-        <View style={[styles.cardRow, {marginBottom: (!speech && !subtitle) ? 10 : 0}]}>
+        <View
+          style={[
+            styles.cardRow,
+            { marginBottom: !speech && !subtitle ? 10 : 0 },
+          ]}
+        >
           <Text style={styles.title}>{title}</Text>
           <View style={styles.cardInnerRow}>{printImage(buttons)}</View>
         </View>
         <View style={styles.cardColumn}>
-          {speech && <Label title={speech} customStyle={{marginTop: 10, marginBottom:5}}/>}
+          {speech && (
+            <Label
+              title={speech}
+              customStyle={{ marginTop: 10, marginBottom: 5 }}
+            />
+          )}
           {subtitle && <Text style={styles.status}>{subtitle}</Text>}
         </View>
         <View style={detail ? styles.cardRow : styles.cardRowEnd}>
           {detail && <Text style={styles.detail}>{detail}</Text>}
           <Button
             image={images.icons.rightarrow_icon_b}
-            buttonStyle={{ height: 20, width: 12}}
+            buttonStyle={{ height: 20, width: 12 }}
             imageSize={{ height: 20, width: 12, marginRight: 0 }}
             type=""
             onPress={() => OnClick(title)}

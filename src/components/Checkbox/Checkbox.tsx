@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  View,
-  StyleSheet,
-  Text,
-  Pressable,
-  Image,
-} from "react-native";
+import { View, StyleSheet, Text, Pressable, Image } from "react-native";
 import Images from "assets/images";
 import { Colors, Typography } from "styles";
 import ICheckbox from "types/components/checkbox";
@@ -23,17 +17,10 @@ const Checkbox: React.FC<ICheckbox> = ({
     <View style={styles.container}>
       <Pressable style={[customStyle, styles.checkbox]} onPress={handleOnCheck}>
         {checked && (
-          <Image
-            source={Images.icons.checkbox_icon}
-            style={styles.icon}
-          />
+          <Image source={Images.icons.checkbox_icon} style={styles.icon} />
         )}
       </Pressable>
-      <Text
-        style={[Typography.base, {color: Colors.primary}]}
-      >
-        {title}
-      </Text>
+      <Text style={[Typography.base, { color: Colors.primary }]}>{title}</Text>
     </View>
   );
 };
@@ -52,7 +39,7 @@ const styles = StyleSheet.create({
   },
   icon: {
     width: 12,
-    height: 10
-  }
+    height: 10,
+  },
 });
 export default Checkbox;

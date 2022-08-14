@@ -4,7 +4,7 @@ import Icon from "components/Icon/Icon";
 import Images from "assets/images";
 import { Colors } from "styles";
 export type Props = {
-  OnChange: (str: string) => void,
+  OnChange: (str: string) => void;
   OnClick: () => void;
   OnPressIn?: () => void;
   customStyle: any;
@@ -19,7 +19,7 @@ const SearchBox: React.FC<Props> = ({
   customStyle,
   placeHolder,
   placeHolderTextColor,
-  value
+  value,
 }) => {
   return (
     <View style={[styles.searchSection, customStyle]}>
@@ -34,14 +34,14 @@ const SearchBox: React.FC<Props> = ({
         style={[styles.input, { width: customStyle.width - 49 }]}
         placeholder={placeHolder}
         onChangeText={(searchString) => {
-          OnChange(searchString)
+          OnChange(searchString);
         }}
         underlineColorAndroid="transparent"
         placeholderTextColor={placeHolderTextColor}
         defaultValue={value}
-        onSubmitEditing={()=> {
-          OnClick()
-          Keyboard.dismiss()
+        onSubmitEditing={() => {
+          OnClick();
+          Keyboard.dismiss();
         }}
         onBlur={Keyboard.dismiss}
         onPressIn={() => OnPressIn && OnPressIn()}
@@ -67,7 +67,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
     paddingTop: 0,
     textAlignVertical: "center",
-    
   },
 });
 export default SearchBox;

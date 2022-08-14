@@ -33,8 +33,8 @@ const SettingPage = ({
 }) => {
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
-  const dispatch: Dispatch<any> = useDispatch()
-  const {speed}: any = useSelector(
+  const dispatch: Dispatch<any> = useDispatch();
+  const { speed }: any = useSelector(
     (state: any) => state.setting,
     shallowEqual
   );
@@ -59,8 +59,8 @@ const SettingPage = ({
           onCancel={() => setModalVisible(false)}
           defaultValue={speed}
           onConfirm={(option: string) => {
-            dispatch(setSetting({speed: option}))
-            setModalVisible(false)
+            dispatch(setSetting({ speed: option }));
+            setModalVisible(false);
           }}
         />
       </Modal>
@@ -80,7 +80,6 @@ const SettingPage = ({
               marginTop: 25,
               marginBottom: 20,
               borderRadius: 65,
-              
             }}
           />
           {!isLoggedIn && (
@@ -97,10 +96,8 @@ const SettingPage = ({
               type="2"
             />
           )}
-          {isLoggedIn && (
-            <Text style={styles.username}>{"Wesley Wong"}</Text>
-          )}
-          
+          {isLoggedIn && <Text style={styles.username}>{"Wesley Wong"}</Text>}
+
           <View>
             {isLoggedIn && (
               <TouchableWithoutFeedback
@@ -153,7 +150,15 @@ const SettingPage = ({
               onPressIn={() => {}}
               onPressOut={() => {}}
             >
-              <View style={[styles.sectionRow, { borderBottomColor: Colors.primary_light, borderBottomWidth: isLoggedIn ? 0 : 1 }]}>
+              <View
+                style={[
+                  styles.sectionRow,
+                  {
+                    borderBottomColor: Colors.primary_light,
+                    borderBottomWidth: isLoggedIn ? 0 : 1,
+                  },
+                ]}
+              >
                 <Text style={styles.sectionText}>{"開發版號"}</Text>
                 <Text style={styles.version}>{"0.2.1"}</Text>
               </View>
@@ -181,48 +186,47 @@ const SettingPage = ({
             )}
             {isLoggedIn && (
               <>
-              <TouchableWithoutFeedback
-                accessible={true}
-                accessibilityLabel={"播放速度"}
-                accessibilityHint={"播放速度"}
-                onPress={() => setModalVisible(true)}
-              >
-                <View
-                  style={[
-                    styles.sectionRow,
-                  ]}
+                <TouchableWithoutFeedback
+                  accessible={true}
+                  accessibilityLabel={"播放速度"}
+                  accessibilityHint={"播放速度"}
+                  onPress={() => setModalVisible(true)}
                 >
-                  <Text style={styles.sectionText}>{"播放速度"}</Text>
-                  <Image
-                    style={styles.sectionArrow}
-                    source={images.icons.rightarrow_icon}
-                  />
-                </View>
-              </TouchableWithoutFeedback>
-              <TouchableWithoutFeedback
-                accessible={true}
-                accessibilityLabel={"隱私權與使用條款"}
-                accessibilityHint={"隱私權與使用條款"}
-                onPress={() => navigation.push("PrivacyPolicyPage")}
-              >
-                <View
-                  style={[
-                    styles.sectionRow,
-                    { borderBottomColor: Colors.primary_light, borderBottomWidth: 1 },
-                  ]}
+                  <View style={[styles.sectionRow]}>
+                    <Text style={styles.sectionText}>{"播放速度"}</Text>
+                    <Image
+                      style={styles.sectionArrow}
+                      source={images.icons.rightarrow_icon}
+                    />
+                  </View>
+                </TouchableWithoutFeedback>
+                <TouchableWithoutFeedback
+                  accessible={true}
+                  accessibilityLabel={"隱私權與使用條款"}
+                  accessibilityHint={"隱私權與使用條款"}
+                  onPress={() => navigation.push("PrivacyPolicyPage")}
                 >
-                  <Text style={styles.sectionText}>{"隱私權與使用條款"}</Text>
-                  <Image
-                    style={styles.sectionArrow}
-                    source={images.icons.rightarrow_icon}
-                  />
-                </View>
-              </TouchableWithoutFeedback>
-            </>
+                  <View
+                    style={[
+                      styles.sectionRow,
+                      {
+                        borderBottomColor: Colors.primary_light,
+                        borderBottomWidth: 1,
+                      },
+                    ]}
+                  >
+                    <Text style={styles.sectionText}>{"隱私權與使用條款"}</Text>
+                    <Image
+                      style={styles.sectionArrow}
+                      source={images.icons.rightarrow_icon}
+                    />
+                  </View>
+                </TouchableWithoutFeedback>
+              </>
             )}
           </View>
         </SafeAreaView>
-        </LinearGradientLayout>
+      </LinearGradientLayout>
     </>
   );
 };
@@ -250,7 +254,7 @@ const styles = StyleSheet.create({
     ...Typography.lg_bold,
     color: Colors.secondary,
     marginBottom: 40,
-  }
+  },
 });
 
 export default SettingPage;

@@ -1,10 +1,10 @@
 import * as actionTypes from "actions/actionTypes";
 
 const initialState: any = {
-  speed: '中',
-  level: '初級',
-  play_paragraph: '一次播放',
-  sort: 'A - Z'
+  speed: "中",
+  level: "初級",
+  play_paragraph: "一次播放",
+  sort: "A - Z",
 };
 
 const setting = (state: any = initialState, action: any): any => {

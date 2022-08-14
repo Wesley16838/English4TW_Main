@@ -6,8 +6,8 @@ export interface IWord {
 
 export interface IItem {
   word: string;
-  detail: string; 
+  detail: string;
   number?: number;
-  handleOnPress:()=>void
-  handleOnRemove:()=>void
+  handleOnPress: () => void;
+  handleOnRemove: () => void;
 }

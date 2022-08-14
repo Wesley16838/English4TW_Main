@@ -8,7 +8,7 @@ import { shallowEqual, useSelector } from "react-redux";
 const DictionaryStack = createStackNavigator();
 
 const DictionaryStackNavigator = () => {
-  const {isLoggedIn}: any = useSelector(
+  const { isLoggedIn }: any = useSelector(
     (state: any) => state.user,
     shallowEqual
   );
@@ -24,24 +24,30 @@ const DictionaryStackNavigator = () => {
         component={DictionaryPage}
         options={{ animationEnabled: false, gestureEnabled: false }}
       />
-      {isLoggedIn && <DictionaryStack.Screen
-        name={"SavedWordPage"}
-        component={SavedWordPage}
-        options={{ animationEnabled: false, gestureEnabled: false }}
-      />}
-      
-      {isLoggedIn && <DictionaryStack.Screen
-        name={"WordDetailPage"}
-        component={WordDetailPage}
-        options={{ animationEnabled: false, gestureEnabled: false }}
-        initialParams={{ word: "" }}
-      />}
-      {isLoggedIn && <DictionaryStack.Screen
-        name={"WordComparePage"}
-        component={WordComparePage}
-        options={{ animationEnabled: false, gestureEnabled: false }}
-        initialParams={{ first: "", second: "" }}
-      />}
+      {isLoggedIn && (
+        <DictionaryStack.Screen
+          name={"SavedWordPage"}
+          component={SavedWordPage}
+          options={{ animationEnabled: false, gestureEnabled: false }}
+        />
+      )}
+
+      {isLoggedIn && (
+        <DictionaryStack.Screen
+          name={"WordDetailPage"}
+          component={WordDetailPage}
+          options={{ animationEnabled: false, gestureEnabled: false }}
+          initialParams={{ word: "" }}
+        />
+      )}
+      {isLoggedIn && (
+        <DictionaryStack.Screen
+          name={"WordComparePage"}
+          component={WordComparePage}
+          options={{ animationEnabled: false, gestureEnabled: false }}
+          initialParams={{ first: "", second: "" }}
+        />
+      )}
     </DictionaryStack.Navigator>
   );
 };
