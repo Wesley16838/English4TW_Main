@@ -221,7 +221,9 @@ const NotePage = ({ navigation }: { navigation: any }) => {
                     )}
                   </View>
                 )}
-                {noteIsSuccess && notes.length === 0 ? (
+                {tagData !== "Unauthorized" &&
+                tagData !== undefined &&
+                notes.length === 0 ? (
                   <View
                     style={{
                       flex: 1,
