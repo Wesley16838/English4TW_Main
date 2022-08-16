@@ -33,9 +33,10 @@ import authDeviceStorage from "services/authDeviceStorage";
 import { getTag } from "services/tag";
 import { getAllNotes } from "services/note";
 import { shallowEqual, useSelector } from "react-redux";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 const NoteItem: React.FC<NItem> = ({ word, index, id }) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const handleOnNoteContent = () => {
     navigation.push("NoteContentPage", {
       id,
@@ -131,7 +132,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
       setModalVisible(true);
     }
   };
-  console.log("note,", notes);
+  console.log("note,", noteData, tagData);
   return (
     <>
       <Modal
@@ -187,7 +188,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
               <ActivityIndicator size="large" />
             ) : (
               <>
-                {tagData !== "Unauthorized" && tagData !== undefined && (
+                {(tagData !== undefined && tagData !== "Unauthorized") && (
                   <View style={styles.sectionRow}>
                     {tagsData.map(
                       (tag: any, index: React.Key | null | undefined) => {
@@ -221,8 +222,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
                     )}
                   </View>
                 )}
-                {tagData !== "Unauthorized" &&
-                tagData !== undefined &&
+                {(noteData !== undefined && noteData !== "Unauthorized") &&
                 notes.length === 0 ? (
                   <View
                     style={{

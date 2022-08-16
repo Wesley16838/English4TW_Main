@@ -43,6 +43,8 @@ import { playOptions, speedOptions } from "utils/constants";
 import { StackNavigationProp } from "@react-navigation/stack";
 
 //  setOnPlaybackStatusUpdate(({ shouldPlay, isLoaded }) => { ... })
+
+// ADD IS READY
 const NoteContentPage = () => {
   const navigation = useNavigation<StackNavigationProp<any>>();
   const route: RouteProp<{ params: { id: number } }, "params"> = useRoute();
@@ -73,13 +75,13 @@ const NoteContentPage = () => {
         setSpeedModalVisible(true);
       },
     },
-    {
-      name: "播放段落",
-      func: () => {
-        setIsOptionVisible(false);
-        setParagraphModalVisible(true);
-      },
-    },
+    // {
+    //   name: "播放段落",
+    //   func: () => {
+    //     setIsOptionVisible(false);
+    //     setParagraphModalVisible(true);
+    //   },
+    // },
   ];
   const { id } = route.params;
   const insets = useSafeAreaInsets();
@@ -115,10 +117,12 @@ const NoteContentPage = () => {
                   headers: { Authorization: `Bearer ${token}` },
                 })
                 .then(() => {
-                  console.log("playbackObject,", playbackObject);
-
+                  playbackObject.setStatusAsync(({
+                    慢: 0.8,
+                    中: 1,
+                    快: 1.3,
+                  } as any)[speed])
                   playbackObject.getStatusAsync().then((res: any) => {
-                    console.log("Object Status,", res);
                     setPlaybackStatus(res);
                     setDuration(res.durationMillis);
                     setIsFinish(false);
@@ -127,6 +131,7 @@ const NoteContentPage = () => {
                     _onPlaybackStatusUpdate
                   );
                 })
+                .then(() =>  setNoteContent(res.data.data.note))
                 .catch((err: React.SetStateAction<string>) => setErrMsg(err));
           } else {
             FileSystem.downloadAsync(
@@ -144,8 +149,14 @@ const NoteContentPage = () => {
                     .loadAsync({
                       uri: FileSystem.documentDirectory + "english4tw.mp3",
                     })
-                    .then(() => {
-                      playbackObject.getStatusAsync().then((res: any) => {
+                    .then(async () => {
+                      console.log('set Rate')
+                      await playbackObject.setRateAsync(({
+                        慢: 0.8,
+                        中: 1,
+                        快: 1.3,
+                      } as any)[speed], true)
+                      await playbackObject.getStatusAsync().then((res: any) => {
                         setPlaybackStatus(res);
                         setDuration(res.durationMillis);
                         setIsFinish(false);
@@ -158,11 +169,11 @@ const NoteContentPage = () => {
                       setErrMsg(err)
                     );
               })
+              .then(() =>  setNoteContent(res.data.data.note))
               .catch((error) => {
                 setErrMsg(error);
               });
           }
-          setNoteContent(res.data.data.note);
         })
         .catch((err) => {
           console.log(err);
@@ -177,6 +188,7 @@ const NoteContentPage = () => {
   }, [playbackObject, isFocused]);
 
   const _onPlaybackStatusUpdate = (playbackStatus: any) => {
+    console.log('_onPlaybackStatusUpdate')
     if (!playbackStatus.isLoaded) {
       // Update your UI for the unloaded state
       if (playbackStatus.error) {
@@ -219,7 +231,6 @@ const NoteContentPage = () => {
       if (playbackObject && isPlay) {
         const status = await playbackObject.pauseAsync();
         setIsPlay(false);
-        setIsPreviousPlay(false);
         return setPlaybackStatus(status);
       }
 
@@ -227,7 +238,6 @@ const NoteContentPage = () => {
       if (playbackObject && !isPlay) {
         const status = await playbackObject.playAsync();
         setIsPlay(true);
-        setIsPreviousPlay(true);
         return setPlaybackStatus(status);
       }
     }
@@ -236,25 +246,33 @@ const NoteContentPage = () => {
   const onSlidingCompleted = async (e: any) => {
     if (playbackObject) {
       //is finish or not
-      // await playbackObject.setPositionAsync(value);
-      if (isPreviousPlay && !isFinish) {
+      if (isPreviousPlay) {
         //Previous is playing and isn't finish
-        const status = await playbackObject.playAsync();
+        const status = await playbackObject.playFromPositionAsync(e);
         setIsPlay(true);
+        setIsPreviousPlay(false);
         return setPlaybackStatus(status);
-      } else if (!isPreviousPlay && isFinish) {
-        const status = await playbackObject.playAsync();
-        setIsPlay(true);
-        setIsFinish(false);
+      } else if (!isPreviousPlay) {
+        const status = await playbackObject.setPositionAsync(e);
+        setIsPlay(false);
         return setPlaybackStatus(status);
       }
     }
   };
 
   const onSlidingStarted = async (e: any) => {
-    if (playbackObject && isPlay) {
-      await playbackObject.pauseAsync();
-      setIsPlay(false);
+    if (playbackObject) {
+      if(isPlay) {
+        const status = await playbackObject.pauseAsync();
+        setIsPlay(false);
+        setIsPreviousPlay(true);
+        return setPlaybackStatus(status);
+      } else if (isFinish) {
+        setIsFinish(false)
+        setIsPlay(false);
+        setIsPreviousPlay(true);
+        //
+      }
     }
   };
 
@@ -264,11 +282,15 @@ const NoteContentPage = () => {
     }
   };
 
-  const changeSpeed = (rate: number) => {
-    playbackObject && playbackObject.setRateAsync(rate, true);
-  };
-  const changePosition = (millis: number) => {
-    playbackObject && playbackObject.setPositionAsync(millis);
+  const changeSpeed = async (option: string) => {
+    console.log('changeSpeed,', option)
+    playbackObject && await playbackObject.setRateAsync(({
+      慢: 0.8,
+      中: 1,
+      快: 1.3,
+    } as any)[option], true);
+    dispatch(setSetting({ speed: option }));
+    setSpeedModalVisible(false);
   };
 
   const handleBack = () => {
@@ -301,8 +323,7 @@ const NoteContentPage = () => {
           onCancel={() => setSpeedModalVisible(false)}
           defaultValue={speed}
           onConfirm={(option: string) => {
-            dispatch(setSetting({ speed: option }));
-            setSpeedModalVisible(false);
+            changeSpeed(option)
           }}
         />
       </Modal>
@@ -390,6 +411,7 @@ const NoteContentPage = () => {
               onSlidingComplete={onSlidingCompleted}
               onSlidingStart={(val) => onSlidingStarted(val)}
               disabled={isDisable}
+              tapToSeek={true}
             />
             <TouchableOpacity
               style={styles.filterButton}
@@ -421,9 +443,11 @@ const NoteContentPage = () => {
                 source={
                   isDisable
                     ? images.icons.disable_play_icon
-                    : isPlay
-                    ? images.icons.pause_icon
-                    : images.icons.play_icon
+                    : isFinish
+                      ? images.icons.replay_icon
+                      : isPlay
+                        ? images.icons.pause_icon
+                        : images.icons.play_icon
                 }
                 style={styles.audioIcon}
               />

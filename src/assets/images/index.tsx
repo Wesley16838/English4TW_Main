@@ -47,6 +47,7 @@ const images = {
     next_icon: require("./icons/nextIcon.png"),
     previous_icon: require("./icons/previousIcon.png"),
     play_icon: require("./icons/playIcon.png"),
+    replay_icon: require("./icons/replayIcon.png"),
     launch_icon: require("./icons/launchIcon.png"),
     facebook_icon: require("./icons/facebookIcon.png"),
     checkbox_icon: require("./icons/checkIcon.png"),

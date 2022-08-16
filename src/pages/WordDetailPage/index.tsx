@@ -39,6 +39,7 @@ import { Dispatch } from "redux";
 import { setSetting } from "actions/setting";
 import Toast from "react-native-root-toast";
 import { propertyObj, speechObj, speedOptions } from "utils/constants";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 const local_json_file = require("../../assets/words/lay.json");
 
@@ -52,7 +53,7 @@ const WordDetailPage = () => {
   let cloneLayoutOrder: any[] = [];
   let layoutLength = 0;
   let wordBody: {} | null | undefined = null;
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const route: RouteProp<
     { params: { word: string; history: string } },
     "params"
@@ -122,7 +123,7 @@ const WordDetailPage = () => {
   const handleOnPlay = () => {
     Speech.speak(word, {
       rate: ({
-        慢: 0.6,
+        慢: 0.8,
         中: 1,
         快: 1.3,
       } as any)[speed],
