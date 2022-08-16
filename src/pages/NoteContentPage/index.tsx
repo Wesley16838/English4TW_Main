@@ -62,6 +62,8 @@ const NoteContentPage = () => {
   const [paragraphModalVisible, setParagraphModalVisible] = useState(false);
   const [noteContent, setNoteContent] = useState<any>(null);
   const dispatch: Dispatch<any> = useDispatch();
+  const queryClient = useQueryClient();
+  const data = queryClient.getQueryData("notesData")
   const { speed, play_paragraph }: any = useSelector(
     (state: any) => state.setting,
     shallowEqual
@@ -301,6 +303,10 @@ const NoteContentPage = () => {
     }).start();
     navigation.goBack();
   };
+
+  const onHandleChangeNote = (num: number) => {
+    
+  }
 
   const isDisable = !noteContent;
   const contentArr =
