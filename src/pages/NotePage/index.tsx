@@ -169,8 +169,6 @@ const NotePage = ({ navigation }: { navigation: any }) => {
   }
 
   const renderNoteList = () => {
-    console.log('notesList,', notes)
-    console.log('In renderNoteList,', notes !== undefined && notes !== "Unauthorized")
     return(
       notes.length === 0 ? (
         <View
@@ -208,7 +206,6 @@ const NotePage = ({ navigation }: { navigation: any }) => {
     )
   }
 
-  
   return (
     <>
       <Modal
