@@ -20,9 +20,10 @@ import { Dispatch } from "redux";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { setSetting } from "actions/setting";
 import { speedOptions } from "utils/constants";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 const SentenceExamplesPage = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [sentences, setSentences] = useState([
     {

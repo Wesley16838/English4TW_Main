@@ -131,6 +131,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
       setModalVisible(true);
     }
   };
+
   const renderTaglist = () => {
     return(
       <View style={styles.sectionRow}>
@@ -315,6 +316,12 @@ const styles = StyleSheet.create({
     height: 255,
     resizeMode: "contain",
   },
+  unAuthContainer: {
+    flex: 1,
+    paddingBottom: 83,
+    alignItems: "center",
+    justifyContent: "center",
+  }
 });
 
 export default NotePage;

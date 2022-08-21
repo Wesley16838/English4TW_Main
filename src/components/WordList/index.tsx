@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 import React from "react";
 import {
   StyleSheet,
@@ -36,7 +37,7 @@ const renderWordItem = (item: string, onClick: () => void, number: number) => {
 };
 
 const WordList: React.FC<IWordList> = ({ data }) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const { isLoggedIn }: any = useSelector(
     (state: any) => state.user,
     shallowEqual

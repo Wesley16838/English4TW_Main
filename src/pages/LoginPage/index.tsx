@@ -156,7 +156,7 @@ const LoginPage = ({ navigation, route }: { navigation: any; route: any }) => {
             style={styles.container}
           >
             <ScrollView
-              contentInset={{ bottom: 100 }}
+              contentInset={{ bottom: Platform.OS === "ios" ? 0 : 100 }}
               contentContainerStyle={{
                 flexGrow: 1,
                 paddingBottom: 40,

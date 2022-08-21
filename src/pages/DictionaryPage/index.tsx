@@ -24,6 +24,7 @@ import words from "assets/words/words.json";
 import WordList from "components/WordList";
 import { shallowEqual, useSelector } from "react-redux";
 import { compose } from "redux";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 const HistoryItem: React.FC<IItem> = ({
   word,
@@ -60,7 +61,7 @@ const HistoryItem: React.FC<IItem> = ({
 };
 
 const DictoinaryPage = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const [searchWord, setSearchWord] = useState("");
   const [history, setHistory] = useState<IItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
