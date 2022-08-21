@@ -72,7 +72,6 @@ const NotePage = ({ navigation }: { navigation: any }) => {
     shallowEqual
   );
   const onSuccessFetchTags = (data: any) => {
-    queryClient.setQueryData("tagsData", data);
     setTagsData(data);
   };
   const onErrorFetchTags = (data: any) => {};
@@ -88,7 +87,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
   });
 
   const onSuccessFetchNotes = (data: any) => {
-    queryClient.setQueryData("notesData", data);
+    console.log('onSuccessFetchNotes', data)
     setNotes(data);
   };
   const onErrorFetchNotes = (data: any) => {};
@@ -132,7 +131,84 @@ const NotePage = ({ navigation }: { navigation: any }) => {
       setModalVisible(true);
     }
   };
-  console.log("note,", noteData, tagData);
+  const renderTaglist = () => {
+    return(
+      <View style={styles.sectionRow}>
+        {tagsData.map(
+          (tag: any, index: React.Key | null | undefined) => {
+            return (
+              <Tag
+                key={index}
+                title={tag["tag_name"]}
+                onPress={() => handleOnFilter()}
+                customStyle={{
+                  paddingHorizontal: 15,
+                  paddingVertical: 3,
+                  marginRight: 5,
+                  marginBottom: 5,
+                }}
+                disable={false}
+                onPressIn={() => {
+                  if (tags.includes(tag["id"])) {
+                    setTags(
+                      tags.filter(
+                        (item: number) => item !== tag["id"]
+                      )
+                    );
+                  } else {
+                    setTags([...tags, tag["id"]]);
+                  }
+                }}
+                isChoosed={tags.includes(tag["id"])}
+              />
+            );
+          }
+        )}
+      </View>
+    )
+  }
+
+  const renderNoteList = () => {
+    console.log('notesList,', notes)
+    console.log('In renderNoteList,', notes !== undefined && notes !== "Unauthorized")
+    return(
+      notes.length === 0 ? (
+        <View
+          style={{
+            flex: 1,
+            paddingBottom: 83,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Image
+            style={styles.imagenotestyle}
+            source={images.icons.note_icon}
+          />
+          <Text style={{ color: Colors.gray_4 }}>尚未新增筆記</Text>
+        </View>
+      ) : (
+        <FlatList
+          contentContainerStyle={{
+            flexGrow: 1,
+          }}
+          showsVerticalScrollIndicator={false}
+          data={notes}
+          renderItem={({ item, index }) => (
+            <NoteItem
+              key={index}
+              word={item.title}
+              index={index + 1}
+              id={item.id}
+            />
+          )}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      )
+    )
+  }
+
+  
   return (
     <>
       <Modal
@@ -188,74 +264,8 @@ const NotePage = ({ navigation }: { navigation: any }) => {
               <ActivityIndicator size="large" />
             ) : (
               <>
-                {(tagData !== undefined && tagData !== "Unauthorized") && (
-                  <View style={styles.sectionRow}>
-                    {tagsData.map(
-                      (tag: any, index: React.Key | null | undefined) => {
-                        return (
-                          <Tag
-                            key={index}
-                            title={tag["tag_name"]}
-                            onPress={() => handleOnFilter()}
-                            customStyle={{
-                              paddingHorizontal: 15,
-                              paddingVertical: 3,
-                              marginRight: 5,
-                              marginBottom: 5,
-                            }}
-                            disable={false}
-                            onPressIn={() => {
-                              if (tags.includes(tag["id"])) {
-                                setTags(
-                                  tags.filter(
-                                    (item: number) => item !== tag["id"]
-                                  )
-                                );
-                              } else {
-                                setTags([...tags, tag["id"]]);
-                              }
-                            }}
-                            isChoosed={tags.includes(tag["id"])}
-                          />
-                        );
-                      }
-                    )}
-                  </View>
-                )}
-                {(noteData !== undefined && noteData !== "Unauthorized") &&
-                notes.length === 0 ? (
-                  <View
-                    style={{
-                      flex: 1,
-                      paddingBottom: 83,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Image
-                      style={styles.imagenotestyle}
-                      source={images.icons.note_icon}
-                    />
-                    <Text style={{ color: Colors.gray_4 }}>尚未新增筆記</Text>
-                  </View>
-                ) : (
-                  <FlatList
-                    contentContainerStyle={{
-                      flexGrow: 1,
-                    }}
-                    showsVerticalScrollIndicator={false}
-                    data={notes}
-                    renderItem={({ item, index }) => (
-                      <NoteItem
-                        key={index}
-                        word={item.title}
-                        index={index + 1}
-                        id={item.id}
-                      />
-                    )}
-                    keyExtractor={(item, index) => index.toString()}
-                  />
-                )}
+                {(tagData !== undefined && tagData !== "Unauthorized") && renderTaglist()}
+                { (notes !== undefined && notes !== "Unauthorized") && renderNoteList() }
               </>
             )
           ) : (

@@ -41,6 +41,8 @@ import { setSetting } from "actions/setting";
 import { Dispatch } from "redux";
 import { playOptions, speedOptions } from "utils/constants";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { getAllNotes } from "services/note";
+import { min } from "lodash";
 
 //  setOnPlaybackStatusUpdate(({ shouldPlay, isLoaded }) => { ... })
 
@@ -48,9 +50,12 @@ import { StackNavigationProp } from "@react-navigation/stack";
 const NoteContentPage = () => {
   const navigation = useNavigation<StackNavigationProp<any>>();
   const route: RouteProp<{ params: { id: number } }, "params"> = useRoute();
+  const { id } = route.params;
+  const [noteId, setNoteId] = useState(id)
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isAudioDisable, setIsAudioDisable] = useState(true)
   const [isPlay, setIsPlay] = useState(false);
   const [isPreviousPlay, setIsPreviousPlay] = useState(false);
   const [isFinish, setIsFinish] = useState(false);
@@ -63,7 +68,6 @@ const NoteContentPage = () => {
   const [noteContent, setNoteContent] = useState<any>(null);
   const dispatch: Dispatch<any> = useDispatch();
   const queryClient = useQueryClient();
-  const data = queryClient.getQueryData("notesData")
   const { speed, play_paragraph }: any = useSelector(
     (state: any) => state.setting,
     shallowEqual
@@ -77,22 +81,25 @@ const NoteContentPage = () => {
         setSpeedModalVisible(true);
       },
     },
-    // {
-    //   name: "播放段落",
-    //   func: () => {
-    //     setIsOptionVisible(false);
-    //     setParagraphModalVisible(true);
-    //   },
-    // },
+    {
+      name: "播放段落",
+      func: () => {
+        setIsOptionVisible(false);
+        setParagraphModalVisible(true);
+      },
+    },
   ];
-  const { id } = route.params;
+
   const insets = useSafeAreaInsets();
+
+  const noteData:any = queryClient.getQueryData("notes")
+  const idx = noteData.map((item:any) => item?.id).indexOf(noteId)
 
   useEffect(() => {
     if (playbackObject === null) {
       setPlaybackObject(new Audio.Sound());
     }
-  }, []);
+  }, [noteId]);
 
   useEffect(() => {
     const fetchAudio = async () => {
@@ -101,7 +108,7 @@ const NoteContentPage = () => {
       axios
         .post(
           "https://www.english4tw.com/api/getUserNote",
-          { note_id: id },
+          { note_id: noteId },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -133,7 +140,7 @@ const NoteContentPage = () => {
                     _onPlaybackStatusUpdate
                   );
                 })
-                .then(() =>  setNoteContent(res.data.data.note))
+                .then(() =>  setIsAudioDisable(false))
                 .catch((err: React.SetStateAction<string>) => setErrMsg(err));
           } else {
             FileSystem.downloadAsync(
@@ -171,11 +178,12 @@ const NoteContentPage = () => {
                       setErrMsg(err)
                     );
               })
-              .then(() =>  setNoteContent(res.data.data.note))
+              .then(() => setIsAudioDisable(false))
               .catch((error) => {
                 setErrMsg(error);
               });
           }
+          setNoteContent(res.data.data.note)
         })
         .catch((err) => {
           console.log(err);
@@ -187,7 +195,7 @@ const NoteContentPage = () => {
     return () => {
       playbackObject && playbackObject.unloadAsync();
     };
-  }, [playbackObject, isFocused]);
+  }, [playbackObject, isFocused, noteId]);
 
   const _onPlaybackStatusUpdate = (playbackStatus: any) => {
     console.log('_onPlaybackStatusUpdate')
@@ -304,15 +312,22 @@ const NoteContentPage = () => {
     navigation.goBack();
   };
 
-  const onHandleChangeNote = (num: number) => {
-    
+  const reset = () => {
+    setNoteContent("")
+    setTime(0)
+    setDuration(0)
+    setIsAudioDisable(true)
   }
 
-  const isDisable = !noteContent;
+  const onHandleChangeNote = (num: number) => {
+    const nextId = noteData[idx + num].id;
+    reset()
+    setNoteId(nextId)
+  }
+
   const contentArr =
     noteContent &&
     noteContent.content.split("\n").map((noteItem: any) => noteItem);
-
   return (
     <>
       <Modal
@@ -386,6 +401,7 @@ const NoteContentPage = () => {
             <View style={{ flex: 1, alignItems: "flex-end" }}>
               <TouchableOpacity
                 onPress={() => {
+                  reset()
                   navigation.push("NewNotePage", {
                     title: noteContent && noteContent.title,
                     content: noteContent && noteContent.content,
@@ -416,7 +432,7 @@ const NoteContentPage = () => {
               onValueChange={onSliderValueChanging}
               onSlidingComplete={onSlidingCompleted}
               onSlidingStart={(val) => onSlidingStarted(val)}
-              disabled={isDisable}
+              disabled={isAudioDisable}
               tapToSeek={true}
             />
             <TouchableOpacity
@@ -433,21 +449,19 @@ const NoteContentPage = () => {
             {isOptionVisible && <ActionButton options={actionList} />}
           </View>
           <View style={styles.audioActions}>
-            <TouchableOpacity onPress={() => {}} disabled={isDisable}>
+            <TouchableOpacity onPress={() => onHandleChangeNote(-1)} disabled={isAudioDisable || idx ===0}>
               <Image
-                source={images.icons.previous_icon}
+                source={(isAudioDisable || idx ===0) ? images.icons.disable_previous_icon : images.icons.previous_icon}
                 style={styles.audioIcon}
               />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => {
-                handleAudioPlayPause();
-              }}
-              disabled={isDisable}
+              onPress={() => handleAudioPlayPause()}
+              disabled={isAudioDisable}
             >
               <Image
                 source={
-                  isDisable
+                  isAudioDisable
                     ? images.icons.disable_play_icon
                     : isFinish
                       ? images.icons.replay_icon
@@ -458,44 +472,48 @@ const NoteContentPage = () => {
                 style={styles.audioIcon}
               />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => {}} disabled={isDisable}>
-              <Image source={images.icons.next_icon} style={styles.audioIcon} />
+            <TouchableOpacity onPress={() => onHandleChangeNote(1)} disabled={isAudioDisable || idx === noteData.length - 1}>
+              <Image 
+                source={(isAudioDisable || idx === noteData.length - 1) ? images.icons.disable_next_icon : images.icons.next_icon} 
+                style={styles.audioIcon} 
+              />
             </TouchableOpacity>
           </View>
-          {isDisable ? (
-            <ActivityIndicator size="large" />
+          {!!noteContent ? (
+             <>
+             <View style={styles.noteContainer}>
+               {contentArr.map((note: any, index: any) => {
+                 return (
+                   <View style={{ marginTop: index !== 0 ? 20 : 0 }} key={`note${index}`}>
+                     <Text key={note} style={Typography.base}>
+                       {note}
+                     </Text>
+                   </View>
+                 );
+               })}
+             </View>
+             <View style={styles.sectionContainer}>
+               {noteContent.tags.map((tag: { [x: string]: string }) => {
+                 return (
+                   <View key={tag["tag_id"]}>
+                     <Tag
+                       title={tag["tag_name"]}
+                       customStyle={{
+                         paddingHorizontal: 15,
+                         paddingVertical: 3,
+                         marginRight: 5,
+                         marginBottom: 5,
+                       }}
+                       disable={true}
+                     />
+                   </View>
+                 );
+               })}
+             </View>
+           </>
+            
           ) : (
-            <>
-              <View style={styles.noteContainer}>
-                {contentArr.map((note: any, index: any) => {
-                  return (
-                    <View style={{ marginTop: index !== 0 ? 20 : 0 }}>
-                      <Text key={note} style={Typography.base}>
-                        {note}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-              <View style={styles.sectionContainer}>
-                {noteContent.tags.map((tag: { [x: string]: string }) => {
-                  return (
-                    <View key={tag["tag_id"]}>
-                      <Tag
-                        title={tag["tag_name"]}
-                        customStyle={{
-                          paddingHorizontal: 15,
-                          paddingVertical: 3,
-                          marginRight: 5,
-                          marginBottom: 5,
-                        }}
-                        disable={true}
-                      />
-                    </View>
-                  );
-                })}
-              </View>
-            </>
+            <ActivityIndicator size="large" />
           )}
         </SafeAreaView>
       </LinearGradientLayout>
@@ -503,6 +521,11 @@ const NoteContentPage = () => {
   );
 };
 const styles = StyleSheet.create({
+  container:{
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center"
+  },
   sectionRow: {
     flexDirection: "row",
     flexWrap: "wrap",

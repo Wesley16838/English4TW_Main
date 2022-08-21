@@ -146,7 +146,7 @@ const SavedWordPage = ({ navigation }: { navigation: any }) => {
     }
   );
 
-  const { mutate: handleOnDeletedWord } = useMutation(
+  const { mutate: handleOnDeletedFavorite } = useMutation(
     async (id: number) => {
       try {
         let token = null;
@@ -317,7 +317,7 @@ const SavedWordPage = ({ navigation }: { navigation: any }) => {
                       {
                         name: "favorite",
                         path: images.icons.favorited_icon,
-                        onClick: () => handleOnDeletedWord(parseInt(item.id)),
+                        onClick: () => handleOnDeletedFavorite(parseInt(item.id)),
                       },
                       {
                         name: "pushpin",
