@@ -35,6 +35,7 @@ import axios from "axios";
 import { getTag } from "services/tag";
 import { getNoteById } from "services/note";
 import { tagOptions } from "utils/constants";
+import { StackNavigationProp } from "@react-navigation/stack";
 // 新增標籤, deleteUserNoteTag, addUserNoteTag, addUserNoteNewTag if edit post, addUserTag if add post, deleteUserNote
 const NewNotePage = () => {
   const [animation, setAnimation] = useState(new Animated.Value(0));
@@ -47,7 +48,7 @@ const NewNotePage = () => {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const firstInput = React.createRef<TextInput>();
   const secondInput = React.createRef<TextInput>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const queryClient = useQueryClient();
   const route: RouteProp<
     {

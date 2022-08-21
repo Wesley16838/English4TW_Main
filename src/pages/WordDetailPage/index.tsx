@@ -123,7 +123,7 @@ const WordDetailPage = () => {
   const handleOnPlay = () => {
     Speech.speak(word, {
       rate: ({
-        慢: 0.6,
+        慢: 0.8,
         中: 1,
         快: 1.3,
       } as any)[speed],

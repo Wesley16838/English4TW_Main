@@ -41,14 +41,21 @@ import { setSetting } from "actions/setting";
 import { Dispatch } from "redux";
 import { playOptions, speedOptions } from "utils/constants";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { getAllNotes } from "services/note";
+import { min } from "lodash";
 
 //  setOnPlaybackStatusUpdate(({ shouldPlay, isLoaded }) => { ... })
+
+// ADD IS READY
 const NoteContentPage = () => {
   const navigation = useNavigation<StackNavigationProp<any>>();
   const route: RouteProp<{ params: { id: number } }, "params"> = useRoute();
+  const { id } = route.params;
+  const [noteId, setNoteId] = useState(id)
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isAudioDisable, setIsAudioDisable] = useState(true)
   const [isPlay, setIsPlay] = useState(false);
   const [isPreviousPlay, setIsPreviousPlay] = useState(false);
   const [isFinish, setIsFinish] = useState(false);
@@ -60,6 +67,7 @@ const NoteContentPage = () => {
   const [paragraphModalVisible, setParagraphModalVisible] = useState(false);
   const [noteContent, setNoteContent] = useState<any>(null);
   const dispatch: Dispatch<any> = useDispatch();
+  const queryClient = useQueryClient();
   const { speed, play_paragraph }: any = useSelector(
     (state: any) => state.setting,
     shallowEqual
@@ -81,14 +89,17 @@ const NoteContentPage = () => {
       },
     },
   ];
-  const { id } = route.params;
+
   const insets = useSafeAreaInsets();
+
+  const noteData:any = queryClient.getQueryData("notes")
+  const idx = noteData.map((item:any) => item?.id).indexOf(noteId)
 
   useEffect(() => {
     if (playbackObject === null) {
       setPlaybackObject(new Audio.Sound());
     }
-  }, []);
+  }, [noteId]);
 
   useEffect(() => {
     const fetchAudio = async () => {
@@ -97,7 +108,7 @@ const NoteContentPage = () => {
       axios
         .post(
           "https://www.english4tw.com/api/getUserNote",
-          { note_id: id },
+          { note_id: noteId },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -115,10 +126,12 @@ const NoteContentPage = () => {
                   headers: { Authorization: `Bearer ${token}` },
                 })
                 .then(() => {
-                  console.log("playbackObject,", playbackObject);
-
+                  playbackObject.setStatusAsync(({
+                    慢: 0.8,
+                    中: 1,
+                    快: 1.3,
+                  } as any)[speed])
                   playbackObject.getStatusAsync().then((res: any) => {
-                    console.log("Object Status,", res);
                     setPlaybackStatus(res);
                     setDuration(res.durationMillis);
                     setIsFinish(false);
@@ -127,6 +140,7 @@ const NoteContentPage = () => {
                     _onPlaybackStatusUpdate
                   );
                 })
+                .then(() =>  setIsAudioDisable(false))
                 .catch((err: React.SetStateAction<string>) => setErrMsg(err));
           } else {
             FileSystem.downloadAsync(
@@ -144,8 +158,14 @@ const NoteContentPage = () => {
                     .loadAsync({
                       uri: FileSystem.documentDirectory + "english4tw.mp3",
                     })
-                    .then(() => {
-                      playbackObject.getStatusAsync().then((res: any) => {
+                    .then(async () => {
+                      console.log('set Rate')
+                      await playbackObject.setRateAsync(({
+                        慢: 0.8,
+                        中: 1,
+                        快: 1.3,
+                      } as any)[speed], true)
+                      await playbackObject.getStatusAsync().then((res: any) => {
                         setPlaybackStatus(res);
                         setDuration(res.durationMillis);
                         setIsFinish(false);
@@ -158,11 +178,12 @@ const NoteContentPage = () => {
                       setErrMsg(err)
                     );
               })
+              .then(() => setIsAudioDisable(false))
               .catch((error) => {
                 setErrMsg(error);
               });
           }
-          setNoteContent(res.data.data.note);
+          setNoteContent(res.data.data.note)
         })
         .catch((err) => {
           console.log(err);
@@ -174,9 +195,10 @@ const NoteContentPage = () => {
     return () => {
       playbackObject && playbackObject.unloadAsync();
     };
-  }, [playbackObject, isFocused]);
+  }, [playbackObject, isFocused, noteId]);
 
   const _onPlaybackStatusUpdate = (playbackStatus: any) => {
+    console.log('_onPlaybackStatusUpdate')
     if (!playbackStatus.isLoaded) {
       // Update your UI for the unloaded state
       if (playbackStatus.error) {
@@ -219,7 +241,6 @@ const NoteContentPage = () => {
       if (playbackObject && isPlay) {
         const status = await playbackObject.pauseAsync();
         setIsPlay(false);
-        setIsPreviousPlay(false);
         return setPlaybackStatus(status);
       }
 
@@ -227,7 +248,6 @@ const NoteContentPage = () => {
       if (playbackObject && !isPlay) {
         const status = await playbackObject.playAsync();
         setIsPlay(true);
-        setIsPreviousPlay(true);
         return setPlaybackStatus(status);
       }
     }
@@ -236,25 +256,33 @@ const NoteContentPage = () => {
   const onSlidingCompleted = async (e: any) => {
     if (playbackObject) {
       //is finish or not
-      // await playbackObject.setPositionAsync(value);
-      if (isPreviousPlay && !isFinish) {
+      if (isPreviousPlay) {
         //Previous is playing and isn't finish
-        const status = await playbackObject.playAsync();
+        const status = await playbackObject.playFromPositionAsync(e);
         setIsPlay(true);
+        setIsPreviousPlay(false);
         return setPlaybackStatus(status);
-      } else if (!isPreviousPlay && isFinish) {
-        const status = await playbackObject.playAsync();
-        setIsPlay(true);
-        setIsFinish(false);
+      } else if (!isPreviousPlay) {
+        const status = await playbackObject.setPositionAsync(e);
+        setIsPlay(false);
         return setPlaybackStatus(status);
       }
     }
   };
 
   const onSlidingStarted = async (e: any) => {
-    if (playbackObject && isPlay) {
-      await playbackObject.pauseAsync();
-      setIsPlay(false);
+    if (playbackObject) {
+      if(isPlay) {
+        const status = await playbackObject.pauseAsync();
+        setIsPlay(false);
+        setIsPreviousPlay(true);
+        return setPlaybackStatus(status);
+      } else if (isFinish) {
+        setIsFinish(false)
+        setIsPlay(false);
+        setIsPreviousPlay(true);
+        //
+      }
     }
   };
 
@@ -264,11 +292,15 @@ const NoteContentPage = () => {
     }
   };
 
-  const changeSpeed = (rate: number) => {
-    playbackObject && playbackObject.setRateAsync(rate, true);
-  };
-  const changePosition = (millis: number) => {
-    playbackObject && playbackObject.setPositionAsync(millis);
+  const changeSpeed = async (option: string) => {
+    console.log('changeSpeed,', option)
+    playbackObject && await playbackObject.setRateAsync(({
+      慢: 0.8,
+      中: 1,
+      快: 1.3,
+    } as any)[option], true);
+    dispatch(setSetting({ speed: option }));
+    setSpeedModalVisible(false);
   };
 
   const handleBack = () => {
@@ -280,11 +312,22 @@ const NoteContentPage = () => {
     navigation.goBack();
   };
 
-  const isDisable = !noteContent;
+  const reset = () => {
+    setNoteContent("")
+    setTime(0)
+    setDuration(0)
+    setIsAudioDisable(true)
+  }
+
+  const onHandleChangeNote = (num: number) => {
+    const nextId = noteData[idx + num].id;
+    reset()
+    setNoteId(nextId)
+  }
+
   const contentArr =
     noteContent &&
     noteContent.content.split("\n").map((noteItem: any) => noteItem);
-
   return (
     <>
       <Modal
@@ -301,8 +344,7 @@ const NoteContentPage = () => {
           onCancel={() => setSpeedModalVisible(false)}
           defaultValue={speed}
           onConfirm={(option: string) => {
-            dispatch(setSetting({ speed: option }));
-            setSpeedModalVisible(false);
+            changeSpeed(option)
           }}
         />
       </Modal>
@@ -359,6 +401,7 @@ const NoteContentPage = () => {
             <View style={{ flex: 1, alignItems: "flex-end" }}>
               <TouchableOpacity
                 onPress={() => {
+                  reset()
                   navigation.push("NewNotePage", {
                     title: noteContent && noteContent.title,
                     content: noteContent && noteContent.content,
@@ -389,7 +432,8 @@ const NoteContentPage = () => {
               onValueChange={onSliderValueChanging}
               onSlidingComplete={onSlidingCompleted}
               onSlidingStart={(val) => onSlidingStarted(val)}
-              disabled={isDisable}
+              disabled={isAudioDisable}
+              tapToSeek={true}
             />
             <TouchableOpacity
               style={styles.filterButton}
@@ -405,67 +449,71 @@ const NoteContentPage = () => {
             {isOptionVisible && <ActionButton options={actionList} />}
           </View>
           <View style={styles.audioActions}>
-            <TouchableOpacity onPress={() => {}} disabled={isDisable}>
+            <TouchableOpacity onPress={() => onHandleChangeNote(-1)} disabled={isAudioDisable || idx ===0}>
               <Image
-                source={images.icons.previous_icon}
+                source={(isAudioDisable || idx ===0) ? images.icons.disable_previous_icon : images.icons.previous_icon}
                 style={styles.audioIcon}
               />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => {
-                handleAudioPlayPause();
-              }}
-              disabled={isDisable}
+              onPress={() => handleAudioPlayPause()}
+              disabled={isAudioDisable}
             >
               <Image
                 source={
-                  isDisable
+                  isAudioDisable
                     ? images.icons.disable_play_icon
-                    : isPlay
-                    ? images.icons.pause_icon
-                    : images.icons.play_icon
+                    : isFinish
+                      ? images.icons.replay_icon
+                      : isPlay
+                        ? images.icons.pause_icon
+                        : images.icons.play_icon
                 }
                 style={styles.audioIcon}
               />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => {}} disabled={isDisable}>
-              <Image source={images.icons.next_icon} style={styles.audioIcon} />
+            <TouchableOpacity onPress={() => onHandleChangeNote(1)} disabled={isAudioDisable || idx === noteData.length - 1}>
+              <Image 
+                source={(isAudioDisable || idx === noteData.length - 1) ? images.icons.disable_next_icon : images.icons.next_icon} 
+                style={styles.audioIcon} 
+              />
             </TouchableOpacity>
           </View>
-          {isDisable ? (
-            <ActivityIndicator size="large" />
+          {!!noteContent ? (
+             <>
+             <View style={styles.noteContainer}>
+               {contentArr.map((note: any, index: any) => {
+                 return (
+                   <View style={{ marginTop: index !== 0 ? 20 : 0 }} key={`note${index}`}>
+                     <Text key={note} style={Typography.base}>
+                       {note}
+                     </Text>
+                   </View>
+                 );
+               })}
+             </View>
+             <View style={styles.sectionContainer}>
+               {noteContent.tags.map((tag: { [x: string]: string }) => {
+                 return (
+                   <View key={tag["tag_id"]}>
+                     <Tag
+                       title={tag["tag_name"]}
+                       customStyle={{
+                         paddingHorizontal: 15,
+                         paddingVertical: 3,
+                         marginRight: 5,
+                         marginBottom: 5,
+                       }}
+                       disable={true}
+                     />
+                   </View>
+                 );
+               })}
+             </View>
+           </>
+            
           ) : (
-            <>
-              <View style={styles.noteContainer}>
-                {contentArr.map((note: any, index: any) => {
-                  return (
-                    <View style={{ marginTop: index !== 0 ? 20 : 0 }}>
-                      <Text key={note} style={Typography.base}>
-                        {note}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-              <View style={styles.sectionContainer}>
-                {noteContent.tags.map((tag: { [x: string]: string }) => {
-                  return (
-                    <View key={tag["tag_id"]}>
-                      <Tag
-                        title={tag["tag_name"]}
-                        customStyle={{
-                          paddingHorizontal: 15,
-                          paddingVertical: 3,
-                          marginRight: 5,
-                          marginBottom: 5,
-                        }}
-                        disable={true}
-                      />
-                    </View>
-                  );
-                })}
-              </View>
-            </>
+            <ActivityIndicator size="large" />
           )}
         </SafeAreaView>
       </LinearGradientLayout>
@@ -473,6 +521,11 @@ const NoteContentPage = () => {
   );
 };
 const styles = StyleSheet.create({
+  container:{
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center"
+  },
   sectionRow: {
     flexDirection: "row",
     flexWrap: "wrap",
