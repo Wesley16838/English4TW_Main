@@ -33,9 +33,10 @@ import authDeviceStorage from "services/authDeviceStorage";
 import { getTag } from "services/tag";
 import { getAllNotes } from "services/note";
 import { shallowEqual, useSelector } from "react-redux";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 const NoteItem: React.FC<NItem> = ({ word, index, id }) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const handleOnNoteContent = () => {
     navigation.push("NoteContentPage", {
       id,
@@ -131,7 +132,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
       setModalVisible(true);
     }
   };
-  console.log("note,", notes);
+ 
   return (
     <>
       <Modal
@@ -221,41 +222,44 @@ const NotePage = ({ navigation }: { navigation: any }) => {
                     )}
                   </View>
                 )}
-                {tagData !== "Unauthorized" &&
-                tagData !== undefined &&
-                notes.length === 0 ? (
-                  <View
-                    style={{
-                      flex: 1,
-                      paddingBottom: 83,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Image
-                      style={styles.imagenotestyle}
-                      source={images.icons.note_icon}
-                    />
-                    <Text style={{ color: Colors.gray_4 }}>尚未新增筆記</Text>
-                  </View>
-                ) : (
-                  <FlatList
-                    contentContainerStyle={{
-                      flexGrow: 1,
-                    }}
-                    showsVerticalScrollIndicator={false}
-                    data={notes}
-                    renderItem={({ item, index }) => (
-                      <NoteItem
-                        key={index}
-                        word={item.title}
-                        index={index + 1}
-                        id={item.id}
+                {noteData !== "Unauthorized" &&
+                noteData !== undefined &&
+                  (
+                    notes.length === 0 ? (
+                      <View
+                        style={{
+                          flex: 1,
+                          paddingBottom: 83,
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Image
+                          style={styles.imagenotestyle}
+                          source={images.icons.note_icon}
+                        />
+                        <Text style={{ color: Colors.gray_4 }}>尚未新增筆記</Text>
+                      </View>
+                    ) : (
+                      <FlatList
+                        contentContainerStyle={{
+                          flexGrow: 1,
+                        }}
+                        showsVerticalScrollIndicator={false}
+                        data={notes}
+                        renderItem={({ item, index }) => (
+                          <NoteItem
+                            key={index}
+                            word={item.title}
+                            index={index + 1}
+                            id={item.id}
+                          />
+                        )}
+                        keyExtractor={(item, index) => index.toString()}
                       />
-                    )}
-                    keyExtractor={(item, index) => index.toString()}
-                  />
-                )}
+                    )
+                  )
+                }
               </>
             )
           ) : (
@@ -308,6 +312,12 @@ const styles = StyleSheet.create({
     height: 255,
     resizeMode: "contain",
   },
+  unAuthContainer: {
+    flex: 1,
+    paddingBottom: 83,
+    alignItems: "center",
+    justifyContent: "center",
+  }
 });
 
 export default NotePage;
