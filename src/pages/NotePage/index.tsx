@@ -262,7 +262,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
               <ActivityIndicator size="large" />
             ) : (
               <>
-                {(tagData !== undefined && tagData !== "Unauthorized") && renderTaglist()}
+                { (tagData !== undefined && tagData !== "Unauthorized") && renderTaglist() }
                 { (notes !== undefined && notes !== "Unauthorized") && renderNoteList() }
               </>
             )

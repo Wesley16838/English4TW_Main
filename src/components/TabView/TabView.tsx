@@ -7,53 +7,55 @@ const TabView: React.FC<ITabview> = ({ titles, customStyle, children }) => {
   const [index, setIndex] = React.useState(0);
   const renderTab = () => {
     return (
-      Array.isArray(titles) &&
-      titles.map((item, idx) => {
-        return (
-          <View
-            key={item + idx}
-            style={[
-              styles.container,
-              {
-                borderColor:
-                  index === idx ? Colors.primary : Colors.transparent,
-                borderWidth: index === idx ? 0.5 : 0,
-              },
-            ]}
-            onTouchEnd={() => setIndex(idx)}
-          >
-            <Text
-              style={[
-                styles.title,
-                {
-                  color: index === idx ? Colors.primary : Colors.primary_light,
-                },
-              ]}
-            >
-              {item}
-            </Text>
-          </View>
-        );
-      })
+      <View style={{ flexDirection: "row", marginBottom: 20 }}>
+        {
+          Array.isArray(titles) &&
+          titles.map((item, idx) => {
+            return (
+              <View
+                key={item + idx}
+                style={[
+                  styles.container,
+                  {
+                    borderColor:
+                      index === idx ? Colors.primary : Colors.transparent,
+                    borderWidth: index === idx ? 0.5 : 0,
+                  },
+                ]}
+                onTouchEnd={() => setIndex(idx)}
+              >
+              <Text
+                style={[
+                  styles.title,
+                  {
+                    color: index === idx ? Colors.primary : Colors.primary_light,
+                  },
+                ]}
+              >
+                {item}
+              </Text>
+            </View>
+            );
+          })
+        }
+      </View>
+      
     );
   };
+
   const renderBody = () => {
     return children?.map((item, idx) => {
       return index === idx && item;
     });
   };
+  
   return (
     <>
-      {children.length > 1 ? (
+      
         <View style={[customStyle]}>
-          <View style={{ flexDirection: "row", marginBottom: 20 }}>
-            {renderTab()}
-          </View>
+          {children.length > 1 && renderTab()}
           <View>{renderBody()}</View>
         </View>
-      ) : (
-        renderBody()
-      )}
     </>
   );
 };
