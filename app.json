@@ -20,7 +20,7 @@
       "bundleIdentifier": "com.english4twmain.app"
     },
     "android": {
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icn_english4tw.png",
         "backgroundColor": "#C48148"

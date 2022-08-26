@@ -50,13 +50,10 @@ const TabView: React.FC<ITabview> = ({ titles, customStyle, children }) => {
   };
   
   return (
-    <>
-      
-        <View style={[customStyle]}>
-          {children.length > 1 && renderTab()}
-          <View>{renderBody()}</View>
-        </View>
-    </>
+      <View style={[customStyle]}>
+        {children.length > 1 && renderTab()}
+        <View>{renderBody()}</View>
+      </View>
   );
 };
 

@@ -10,6 +10,8 @@ import {
   Modal,
   Alert,
   Share,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import _, { indexOf } from "lodash";
 import Button from "components/Button/Button";
@@ -18,7 +20,6 @@ import Label from "components/Label/Label";
 import images from "assets/images";
 import { DEVICE_HEIGHT, DEVICE_WIDTH } from "pages/SplashPage";
 import {
-  QueryClient,
   useMutation,
   useQuery,
   useQueryClient,
@@ -26,10 +27,8 @@ import {
 import { Colors, Spacing, Typography } from "styles";
 import LinearGradientLayout from "components/LinearGradientLayout";
 import { useNavigation, RouteProp, useRoute } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { IItem } from "types/pages/word";
 import Accordion from "components/Accordion";
-import axios from "axios";
 import authDeviceStorage from "services/authDeviceStorage";
 import api from "services/api";
 import deviceStorage from "services/deviceStorage";
@@ -40,19 +39,28 @@ import { setSetting } from "actions/setting";
 import Toast from "react-native-root-toast";
 import { propertyObj, speechObj, speedOptions } from "utils/constants";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { getSavedWords } from "services/word";
+import { isCloseToBottom, isCloseToTop } from "utils/helper";
+import TabView from "components/TabView/TabView";
 
 const local_json_file = require("../../assets/words/lay.json");
+
+let layoutOrder: any[] = [];
+let cloneLayoutOrder: any[] = [];
+let layoutLength = 0;
 
 const WordDetailPage = () => {
   const [accordion, setAccordion] = useState<boolean[]>([]);
   const [speedModalVisible, setSpeedModalVisible] = useState<boolean>(false);
+  const [borderPosition, setBorderPosition] = useState({
+    top: true,
+    bottom: false
+  })
   const dispatch: Dispatch<any> = useDispatch();
   const scrollViewRef: any = useRef(null);
   const queryClient = useQueryClient();
-  let layoutOrder: any[] = [];
-  let cloneLayoutOrder: any[] = [];
-  let layoutLength = 0;
-  let wordBody: {} | null | undefined = null;
+
+  let wordBody: any[] = []
   const navigation = useNavigation<StackNavigationProp<any>>();
   const route: RouteProp<
     { params: { word: string; history: string } },
@@ -60,11 +68,20 @@ const WordDetailPage = () => {
   > = useRoute();
   const { word, history } = route.params;
 
-  const savedWordData: any = queryClient.getQueryData("saved_words");
+  const { data: savedWordData, error, isError, refetch } = getSavedWords(
+    [],
+    () => {},
+    () => {},
+    {
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+    }
+  );
   const saved =
-    savedWordData.find(
+    savedWordData && savedWordData.find(
       (item: any) => item.word.toLowerCase() === word.toLowerCase()
-    ) || null;
+    );
+
 
   const { speed }: any = useSelector(
     (state: any) => state.setting,
@@ -176,8 +193,9 @@ const WordDetailPage = () => {
     }
   };
 
-  const wordObj = wordInfo?.content || local_json_file?.content;
-  wordBody =
+  const wordObjs =[local_json_file?.content];
+  wordObjs.map(wordObj => {
+    const wordItem =
     isSuccess &&
     Object.keys(wordObj).map((words: any, wordIndex: number) => {
       return (
@@ -201,7 +219,6 @@ const WordDetailPage = () => {
               <Label title={speechObj[words]} />
               {Object.keys(wordObj[words]).map((property) => {
                 if (property !== "simple" && property !== "tags") {
-                  layoutLength++;
                   return (
                     <Text
                       key={`${words}${propertyObj[property]}`}
@@ -238,7 +255,13 @@ const WordDetailPage = () => {
           {Object.keys(wordObj[words]).map(
             (property: string, propertyIndex: number) => {
               if (property !== "simple" && property !== "tags") {
-                layoutOrder.push({ name: `${words}_${property}` });
+                const index = layoutOrder.findIndex(
+                  (i) => i.name === `${words}_${property}`
+                );
+                if(index === -1) {
+                  layoutOrder.push({ name: `${words}_${property}` });
+                  layoutLength++;
+                }
               }
               let accordionBody = null;
               accordionBody = wordObj[words][property].map(
@@ -280,7 +303,7 @@ const WordDetailPage = () => {
                         layoutLength--;
                       }
                     }
-                    // update height base on previous height
+
                     if (layoutLength === 0) {
                       for (let i = 0; i < layoutOrder.length - 1; i++) {
                         // 不同類別
@@ -308,9 +331,11 @@ const WordDetailPage = () => {
                             layoutOrder[i].height.height;
                         }
                       }
-                      if (cloneLayoutOrder.length === 0)
+                      if (cloneLayoutOrder.length === 0){
                         cloneLayoutOrder = _.cloneDeep(layoutOrder);
+                      }
                     }
+
                   }}
                   key={`${words}_${property}_${propertyIndex}`}
                 >
@@ -337,6 +362,8 @@ const WordDetailPage = () => {
         </View>
       );
     });
+    wordBody.push(wordItem)
+  });
   // && wordObj[words][property].length !== 0 // && accordionBody.length !== 0
 
   const handleOnSearch = () =>
@@ -441,6 +468,7 @@ const WordDetailPage = () => {
       },
     }
   );
+
   return (
     <>
       <Modal
@@ -468,11 +496,20 @@ const WordDetailPage = () => {
             contentContainerStyle={{ flexGrow: 1 }}
             showsVerticalScrollIndicator={false}
             ref={scrollViewRef}
+            onScroll={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
+                if(isCloseToTop(event)) {
+                  setBorderPosition({top: true, bottom: false})
+                } else if (isCloseToBottom(event)) {
+                  setBorderPosition({top: false, bottom: true})
+                } else {
+                  setBorderPosition({top: false, bottom: false})
+                }
+              }}
+              scrollEventThrottle={400}
           >
             <View style={styles.sectionRow}>
               <View style={styles.actionsheet}>
                 <Button
-                  title=""
                   image={images.icons.leftarrow_icon}
                   buttonStyle={{ height: 20, width: 12 }}
                   imageSize={{ height: 20, width: 12, marginRight: 0 }}
@@ -480,7 +517,6 @@ const WordDetailPage = () => {
                   onPress={() => handleBack()}
                 />
                 <Button
-                  title=""
                   image={images.icons.rightarrow_disable_icon}
                   buttonStyle={{ height: 20, width: 12 }}
                   imageSize={{ height: 20, width: 12, marginRight: 0 }}
@@ -489,7 +525,6 @@ const WordDetailPage = () => {
                 />
               </View>
               <Button
-                title=""
                 image={images.icons.search_icon}
                 buttonStyle={{ height: 30, width: 30 }}
                 imageSize={{ height: 30, width: 30, marginRight: 0 }}
@@ -508,7 +543,6 @@ const WordDetailPage = () => {
               }}
             >
               <Button
-                title=""
                 image={images.icons.share_icon}
                 buttonStyle={{ height: 30, width: 30 }}
                 imageSize={{ height: 30, width: 30, marginRight: 0 }}
@@ -516,7 +550,6 @@ const WordDetailPage = () => {
                 onPress={() => handleOnShare()}
               />
               <Button
-                title=""
                 image={
                   saved ? images.icons.favorited_icon : images.icons.saved_icon
                 }
@@ -536,7 +569,6 @@ const WordDetailPage = () => {
               />
               {saved && (
                 <Button
-                  title=""
                   image={
                     saved?.pinned === 1
                       ? images.icons.push_pin_selected_icon
@@ -549,7 +581,6 @@ const WordDetailPage = () => {
                 />
               )}
               <Button
-                title=""
                 image={images.icons.speed_secondary_icon}
                 buttonStyle={{ height: 30, width: 30 }}
                 imageSize={{ height: 30, width: 30, marginRight: 0 }}
@@ -560,14 +591,37 @@ const WordDetailPage = () => {
             {isLoading ? (
               <ActivityIndicator size="large" />
             ) : (
-              // <TabView
-              //   titles={["發音一", "發音二"]}
-              //   customStyle={{ width: DEVICE_WIDTH - 40, marginHorizontal: 20 }}
-              //   children={tabBody}
-              // />
-              <View style={{ alignItems: "center" }}>{wordBody}</View>
+              <TabView
+                titles={["發音一", "發音二"]}
+                customStyle={{ width: DEVICE_WIDTH - 40, marginHorizontal: 20 }}
+                children={wordBody}
+              />
+              // <View style={{ alignItems: "center" }}>{wordBody}</View>
             )}
           </ScrollView>
+          <View style={{position: "absolute", right: 9, bottom: 9}}>
+            <Button
+              image={borderPosition.top ? images.icons.go_up_disable_icon : images.icons.go_up_icon}
+              buttonStyle={{ height: 50, width: 50 }}
+              imageSize={{ height: 50, width: 50, marginRight: 0 }}
+              type=""
+              onPress={() => {
+                scrollViewRef.current.scrollTo({
+                  y: 0,
+                  animated: true,
+                });
+              }}
+              isDisabled={borderPosition.top}
+            />
+            <Button
+              image={ borderPosition.bottom ? images.icons.go_down_disable_icon : images.icons.go_down_icon }
+              buttonStyle={{ height: 50, width: 50 }}
+              imageSize={{ height: 50, width: 50, marginRight: 0 }}
+              type=""
+              onPress={() => scrollViewRef.current.scrollToEnd({ animated: true })}
+              isDisabled={borderPosition.bottom}
+            />
+          </View>
         </SafeAreaView>
       </LinearGradientLayout>
     </>
