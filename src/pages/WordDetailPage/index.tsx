@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -13,7 +13,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from "react-native";
-import _, { indexOf } from "lodash";
+import _ from "lodash";
 import Button from "components/Button/Button";
 import ModalContainer from "components/Modal/Modal";
 import Label from "components/Label/Label";
@@ -43,19 +43,19 @@ import { getSavedWords } from "services/word";
 import { isCloseToBottom, isCloseToTop } from "utils/helper";
 import TabView from "components/TabView/TabView";
 
-const local_json_file = require("../../assets/words/lay.json");
-
-let layoutOrder: any[] = [];
-let cloneLayoutOrder: any[] = [];
-let layoutLength = 0;
+let layoutOrder: any[] = [[], []];
+let cloneLayoutOrder: any[] = [[], []];
+let layoutLength = [0, 0];
 
 const WordDetailPage = () => {
-  const [accordion, setAccordion] = useState<boolean[]>([]);
+ 
+  const [accordion, setAccordion] = useState<any>([[], []]);
   const [speedModalVisible, setSpeedModalVisible] = useState<boolean>(false);
   const [borderPosition, setBorderPosition] = useState({
     top: true,
     bottom: false
   })
+
   const dispatch: Dispatch<any> = useDispatch();
   const scrollViewRef: any = useRef(null);
   const queryClient = useQueryClient();
@@ -67,7 +67,15 @@ const WordDetailPage = () => {
     "params"
   > = useRoute();
   const { word, history } = route.params;
-
+  useEffect(() => {
+    return () => {
+        // componentwillunmount in functional component.
+        // Anything in here is fired on component unmount.
+      layoutOrder = [[], []];
+      cloneLayoutOrder = [[], []];
+      layoutLength = [0, 0];
+    }
+}, [])
   const { data: savedWordData, error, isError, refetch } = getSavedWords(
     [],
     () => {},
@@ -112,7 +120,6 @@ const WordDetailPage = () => {
     fetchWord,
     {
       onSuccess: async (data) => {
-        const array: boolean[] = [];
         const jsonValue = history ? JSON.parse(history) : [];
         const index = history
           ? jsonValue.map((e: IItem) => e.word)?.indexOf(word)
@@ -130,7 +137,7 @@ const WordDetailPage = () => {
           `${word}`,
           JSON.stringify({ word: data, date: loginDate })
         );
-        setAccordion(array);
+
       },
       onError: () => {},
       cacheTime: 1000 * 60 * 60 * 12, // half day
@@ -146,7 +153,7 @@ const WordDetailPage = () => {
       } as any)[speed],
     });
   };
-  const handleBack = () => navigation.goBack();
+  const handleBack = () => navigation.pop();
   const handleNext = () => navigation.push("SentenceAnalysisPage");
 
   const renderDef: any = (obj: any, defIndex: number) => {
@@ -193,11 +200,12 @@ const WordDetailPage = () => {
     }
   };
 
-  const wordObjs =[local_json_file?.content];
-  wordObjs.map(wordObj => {
+  const wordObjs = wordInfo && (wordInfo?.tabs ? wordInfo.tabs.map((tab: any) => tab.content) : [wordInfo.content])
+  wordInfo && wordObjs.map((wordObj: any, wordObjIndex: number) => {
     const wordItem =
     isSuccess &&
     Object.keys(wordObj).map((words: any, wordIndex: number) => {
+      if(words === "成語") return;
       return (
         /* 詞彙區 */
         <View style={{ flexDirection: "column" }} key={`wordBody${wordIndex}`}>
@@ -224,12 +232,17 @@ const WordDetailPage = () => {
                       key={`${words}${propertyObj[property]}`}
                       style={styles.propertyText}
                       onPress={() => {
-                        const index = layoutOrder.findIndex(
-                          (i) => i.name === `${words}_${property}`
+                        const index = layoutOrder[wordObjIndex].findIndex(
+                          (i: { name: string; }) => i.name === `${words}_${property}`
                         );
                         scrollViewRef.current.scrollTo({
-                          y: layoutOrder[index].height.y,
+                          y: layoutOrder[wordObjIndex][index].height.y,
                           animated: true,
+                        });
+                        setAccordion((prev:boolean[][]) => {
+                          const arr = JSON.parse(JSON.stringify(prev))
+                          arr[wordObjIndex][index] = true
+                          return arr
                         });
                       }}
                     >
@@ -240,7 +253,7 @@ const WordDetailPage = () => {
               })}
             </View>
             {/* 解釋區 */}
-            {wordObj[words]["simple"].map((def: any, index: number) => {
+            {wordObj[words]["simple"] && wordObj[words]["simple"].map((def: any, index: number) => {
               return (
                 <View
                   style={{ marginTop: index !== 0 ? 20 : 0 }}
@@ -255,12 +268,17 @@ const WordDetailPage = () => {
           {Object.keys(wordObj[words]).map(
             (property: string, propertyIndex: number) => {
               if (property !== "simple" && property !== "tags") {
-                const index = layoutOrder.findIndex(
-                  (i) => i.name === `${words}_${property}`
+                const index = layoutOrder[wordObjIndex].findIndex(
+                  (i: { name: string; }) => i.name === `${words}_${property}`
                 );
                 if(index === -1) {
-                  layoutOrder.push({ name: `${words}_${property}` });
-                  layoutLength++;
+                  layoutOrder[wordObjIndex].push({ name: `${words}_${property}` });
+                  layoutLength[wordObjIndex]++;
+                  setAccordion((existingItems: any) => {
+                    const arr = JSON.parse(JSON.stringify(existingItems))
+                    arr[wordObjIndex].push(false)
+                    return arr
+                  });
                 }
               }
               let accordionBody = null;
@@ -285,54 +303,54 @@ const WordDetailPage = () => {
                   }
                 }
               );
-
+              const layoutIndex = layoutOrder[wordObjIndex].findIndex(
+                (i: { name: string; }) => i.name === `${words}_${property}`
+              );
               return (
                 <View
                   onLayout={(event) => {
                     // set base height for each section
                     if (property !== "simple" && property !== "tags") {
-                      const layoutIndex = layoutOrder.findIndex(
-                        (i) => i.name === `${words}_${property}`
-                      );
+                     
                       const newHeight = event.nativeEvent.layout;
-                      layoutOrder[layoutIndex] = {
-                        ...layoutOrder[layoutIndex],
+                      layoutOrder[wordObjIndex][layoutIndex] = {
+                        ...layoutOrder[wordObjIndex][layoutIndex],
                         height: newHeight,
                       };
-                      if (layoutLength > 0) {
-                        layoutLength--;
+                      if (layoutLength[wordObjIndex] > 0) {
+                        layoutLength[wordObjIndex]--;
                       }
                     }
 
-                    if (layoutLength === 0) {
-                      for (let i = 0; i < layoutOrder.length - 1; i++) {
+                    if (layoutLength[wordObjIndex] === 0) {
+                      for (let i = 0; i < layoutOrder[wordObjIndex].length - 1; i++) {
                         // 不同類別
                         if (
-                          layoutOrder[i].name.split("_")[0] !==
-                          layoutOrder[i + 1].name.split("_")[0]
+                          layoutOrder[wordObjIndex][i].name.split("_")[0] !==
+                          layoutOrder[wordObjIndex][i + 1].name.split("_")[0]
                         ) {
-                          if (cloneLayoutOrder.length === 0) {
-                            layoutOrder[i + 1].height.y =
-                              layoutOrder[i].height.y +
-                              layoutOrder[i + 1].height.y;
+                          if (cloneLayoutOrder[wordObjIndex].length === 0) {
+                            layoutOrder[wordObjIndex][i + 1].height.y =
+                              layoutOrder[wordObjIndex][i].height.y +
+                              layoutOrder[wordObjIndex][i + 1].height.y;
                           } else {
                             // next height = current height + height difference between next and current + increased height
-                            layoutOrder[i + 1].height.y =
-                              layoutOrder[i].height.y +
-                              (cloneLayoutOrder[i + 1].height.y -
-                                cloneLayoutOrder[i].height.y) +
-                              (layoutOrder[i].height.height -
-                                cloneLayoutOrder[i].height.height);
+                            layoutOrder[wordObjIndex][i + 1].height.y =
+                              layoutOrder[wordObjIndex][i].height.y +
+                              (cloneLayoutOrder[wordObjIndex][i + 1].height.y -
+                                cloneLayoutOrder[wordObjIndex][i].height.y) +
+                              (layoutOrder[wordObjIndex][i].height.height -
+                                cloneLayoutOrder[wordObjIndex][i].height.height);
                           }
                         } else {
                           // 同類別
-                          layoutOrder[i + 1].height.y =
-                            layoutOrder[i].height.y +
-                            layoutOrder[i].height.height;
+                          layoutOrder[wordObjIndex][i + 1].height.y =
+                            layoutOrder[wordObjIndex][i].height.y +
+                            layoutOrder[wordObjIndex][i].height.height;
                         }
                       }
-                      if (cloneLayoutOrder.length === 0){
-                        cloneLayoutOrder = _.cloneDeep(layoutOrder);
+                      if (cloneLayoutOrder[wordObjIndex].length === 0){
+                        cloneLayoutOrder[wordObjIndex] = _.cloneDeep(layoutOrder[wordObjIndex]);
                       }
                     }
 
@@ -345,14 +363,21 @@ const WordDetailPage = () => {
                       content={accordionBody}
                       key={`accordion${propertyIndex}`}
                       onOpen={() => {
+                        
                         const obj = Object.keys(wordObj[words]);
-                        layoutLength =
+                        layoutLength[wordObjIndex] =
                           obj.length -
                           obj.indexOf(property) -
                           (obj.indexOf("simple") > obj.indexOf(property)
                             ? 1
                             : 0);
+                          setAccordion((prev:boolean[][]) => {
+                            const arr = JSON.parse(JSON.stringify(prev))
+                            arr[wordObjIndex][layoutIndex] = !arr[layoutIndex]
+                            return arr
+                          });
                       }}
+                      isActived={accordion[wordObjIndex][layoutIndex]}
                     />
                   )}
                 </View>
