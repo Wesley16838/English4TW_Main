@@ -1,6 +1,6 @@
 export interface IAccordion {
   title: string;
   content: any;
-  isActiveDefault?: boolean;
+  isActived?: boolean;
   onOpen: any;
 }

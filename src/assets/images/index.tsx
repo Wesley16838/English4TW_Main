@@ -63,6 +63,10 @@ const images = {
     disable_previous_icon: require("./icons/disablePreviousIcon.png"),
     push_pin_icon: require("./icons/pushpinIcon.png"),
     push_pin_selected_icon: require("./icons/pushpinSelectedIcon.png"),
+    go_up_icon: require("./icons/goUpIcon.png"),
+    go_down_icon: require("./icons/goDownIcon.png"),
+    go_up_disable_icon: require("./icons/goUpDisableIcon.png"),
+    go_down_disable_icon: require("./icons/goDownDisableIcon.png")
   },
 };
 
