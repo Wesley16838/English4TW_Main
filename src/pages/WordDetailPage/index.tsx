@@ -392,7 +392,7 @@ const WordDetailPage = () => {
   // && wordObj[words][property].length !== 0 // && accordionBody.length !== 0
 
   const handleOnSearch = () =>
-    navigation.navigate("字典", { screen: "DictionaryPage" });
+    navigation.pop();
   const handleOnShare = async () => {
     try {
       const result = await Share.share({
