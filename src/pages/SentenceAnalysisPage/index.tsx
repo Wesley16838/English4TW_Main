@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
 import Button from "components/Button/Button";
 import Images from "assets/images";
@@ -21,8 +22,13 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import * as Speech from "expo-speech";
 import api from "services/api";
 import authDeviceStorage from "services/authDeviceStorage";
+import { setNextPage } from "actions/page";
 const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
   const dispatch: Dispatch<any> = useDispatch();
+  const { parameter, nextPage }: any = useSelector(
+    (state: any) => state.page,
+    shallowEqual
+  );
   const route: RouteProp<
     { params: { sentence: string } },
     "params"
@@ -30,7 +36,7 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
   const { sentence } = route.params;
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [analysis, setAnalysis] = useState([]);
-
+  const nextEnable = nextPage.indexOf('SentenceExamplesPage') !== -1
   const { mutate, isLoading } = useMutation(
     async () => {
       try {
@@ -79,6 +85,7 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
   useEffect(() => mutate(), [sentence]);
 
   React.useEffect(() => {
+    console.log('React.useEffect,')
     Animated.timing(animation, {
       toValue: 1,
       duration: 300,
@@ -101,31 +108,21 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
     }).start();
     navigation.goBack();
   };
+  //
   const handleNext = () => {
-    Animated.timing(animation, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-    navigation.push("SentenceAnalysisPage");
+    if(nextEnable) {
+      navigation.push("SentenceExamplesPage", {
+        sentence: parameter[0]
+      });
+    }
   };
-
+  
   const renderAnalysisSection = () => {
     return analysis.map((anal, index) => {
       return (
-        <View key={index}>
-          <Text style={styles.sentence_analysis}>{anal}</Text>
-          {/* <View style={{ flexDirection: "row", marginBottom: 6 }}>
-            <Text
-              style={{
-                ...Typography.lg_bold,
-                marginBottom: 6,
-                lineHeight: 23,
-                color: Colors.secondary,
-              }}
-            >
-              (人) put a spin on (事)
-            </Text>
+        <View key={index} style={{flexDirection: "row", flexWrap: "wrap", marginBottom: 30}}>
+          <Text style={styles.sentence_analysis}>
+            {anal}{" "}
             <Text
               style={{
                 ...Typography.lg_bold,
@@ -134,25 +131,26 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
                 marginLeft: 10,
               }}
               onPress={() => {
+                 
+                  const len = parameter.length - 1
+                  if( parameter[len] !==  anal) {
+                    const nextPageArr = [...nextPage.slice(0, len)]
+                    const parameterArr = [...parameter.slice(0, len)]
+                    dispatch(setNextPage({
+                      page: nextPageArr,
+                      parameter: parameterArr
+                    }))
+                  }
                   navigation.push("SentenceExamplesPage", {
-                    sentence: "put a spin on",
+                    sentence: anal,
                   })
                 }
               }
             >
               &#60; 看例句 &#62;
             </Text>
-          </View>
-          <Text
-            style={{
-             ...Typography.lg_bold,
-              marginBottom: 30,
-              lineHeight: 23,
-              color: Colors.secondary,
-            }}
-          >
-            對...加油添醋
-          </Text> */}
+          </Text>
+          
         </View>
       );
     });
@@ -192,7 +190,7 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
               />
               <Button
                 title=""
-                image={Images.icons.rightarrow_disable_icon}
+                image={nextEnable ? Images.icons.rightarrow_icon_b : Images.icons.rightarrow_disable_icon}
                 buttonStyle={{ height: 20, width: 12 }}
                 imageSize={{ height: 20, width: 12, marginRight: 0 }}
                 type=""
@@ -209,10 +207,10 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
             />
           </View>
           <ScrollView
-            contentInset={{ bottom: 15, top: 0 }}
-            showsVerticalScrollIndicator={false}
-            automaticallyAdjustContentInsets={false}
-          >
+        contentInset={{ bottom: 15, top: 0 }}
+        showsVerticalScrollIndicator={false}
+        automaticallyAdjustContentInsets={false}
+      >
             <View style={styles.content}>
               <View style={styles.topic}>
                 <Image
@@ -279,7 +277,6 @@ const SentenceAnalysisPage = ({ navigation }: { navigation: any }) => {
                 <View
                   style={{
                     flex: 1,
-                    marginBottom: 30,
                     flexDirection: "column",
                     flexWrap: "wrap",
                   }}

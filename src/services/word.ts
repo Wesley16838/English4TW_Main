@@ -74,6 +74,7 @@ export const getUserWords = (
     onError,
     refetchOnMount: parameters?.refetchOnMount || false,
     refetchOnWindowFocus: parameters?.refetchOnWindowFocus || false,
+    enabled: parameters?.enable || true
   });
 };
 

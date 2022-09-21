@@ -43,11 +43,17 @@ import { playOptions, speedOptions } from "utils/constants";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { getAllNotes } from "services/note";
 import { min } from "lodash";
+import { cps } from "redux-saga/effects";
+import { resetNextPage } from "actions/page";
 
 //  setOnPlaybackStatusUpdate(({ shouldPlay, isLoaded }) => { ... })
 
 // ADD IS READY
 const NoteContentPage = () => {
+  const { nextPage }: any = useSelector(
+    (state: any) => state.page,
+    shallowEqual
+  );
   const navigation = useNavigation<StackNavigationProp<any>>();
   const route: RouteProp<{ params: { id: number } }, "params"> = useRoute();
   const { id } = route.params;
@@ -91,7 +97,6 @@ const NoteContentPage = () => {
   ];
 
   const insets = useSafeAreaInsets();
-
   const noteData:any = queryClient.getQueryData("notes")
   const idx = noteData.map((item:any) => item?.id).indexOf(noteId)
 
@@ -328,6 +333,12 @@ const NoteContentPage = () => {
   const contentArr =
     noteContent &&
     noteContent.content.split("\n").map((noteItem: any) => noteItem);
+  console.log('nextPage,', nextPage)
+  if(isFocused && !!nextPage[0]) {
+    console.log('resetNextPage')
+    dispatch(resetNextPage());
+  }
+
   return (
     <>
       <Modal
@@ -484,10 +495,20 @@ const NoteContentPage = () => {
              <View style={styles.noteContainer}>
                {contentArr.map((note: any, index: any) => {
                  return (
-                   <View style={{ marginTop: index !== 0 ? 20 : 0 }} key={`note${index}`}>
-                     <Text key={note} style={Typography.base}>
-                       {note}
-                     </Text>
+                   <View style={{ marginTop: index !== 0 ? 20 : 0}} key={`note${index}`}>
+                    <Text key={note} style={Typography.base}>
+                      {note}{" "}
+                    <Text 
+                      onPress={() => {
+                        navigation.push("SentenceAnalysisPage", {
+                          sentence: note
+                        })
+                      }}
+                      style={{color: Colors.primary}}
+                    >
+                      &#60;詞句分析&#62;
+                    </Text>
+                    </Text>
                    </View>
                  );
                })}
