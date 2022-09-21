@@ -73,11 +73,18 @@ const HomePage = () => {
 
   const onErrorFetchUserWords = (data: any) => {};
 
-  const { data, isLoading } = getUserWords(
-    [isLoggedIn],
+  const { data, isLoading, refetch } = getUserWords(
+    [],
     onSuccessFetchUserWords,
-    onErrorFetchUserWords
+    onErrorFetchUserWords,
+    {
+      enable: false
+    }
   );
+
+  useEffect(()=> {
+    if(isLoggedIn) refetch()
+  }, [isLoggedIn])
 
   const filterData = words.filter(
     (word) => searchWord && word.indexOf(searchWord.toUpperCase()) === 0

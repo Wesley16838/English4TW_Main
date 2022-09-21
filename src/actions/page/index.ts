@@ -1,11 +1,11 @@
 import * as actionTypes from "actions/actionTypes";
 
-export const setNextPage = (page: string, parameter?: object) => ({
+export const setNextPage = (data: any) => ({
     type: actionTypes.SET_NEXT_PAGE,
-    page,
-    parameter,
+    page: data.page,
+    parameter: data.parameter,
 });
 
-export const resetNextPage = (page: string, parameter: object) => ({
+export const resetNextPage = () => ({
     type: actionTypes.RESET_NEXT_PAGE,
 });
