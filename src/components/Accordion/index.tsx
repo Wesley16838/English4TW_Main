@@ -7,23 +7,19 @@ import { Colors, Spacing, Typography } from "styles";
 const Accordion: React.FC<IAccordion> = ({
   title,
   content,
-  isActiveDefault = false,
+  isActived = false,
   onOpen,
 }) => {
-  const [isActive, setIsActive] = useState(isActiveDefault);
   return (
     <View style={styles.accordion}>
       <View
         style={styles.accordion_title_container}
-        onTouchEnd={() => {
-          onOpen();
-          setIsActive(!isActive);
-        }}
+        onTouchEnd={() => onOpen()}
       >
         <Text style={styles.accordion_title}>{title}</Text>
         {/* <Text>{isActive ? '-' : '+'}</Text> */}
       </View>
-      {isActive && <View style={styles.accordion_content}>{content}</View>}
+      {isActived && <View style={styles.accordion_content}>{content}</View>}
     </View>
   );
 };

@@ -1,0 +1,55 @@
+{
+    "word": "trunk",
+    "content": {
+        "名詞": {
+            "simple": [
+                {
+                    "definitions": [
+                        "樹幹, 軀幹",
+                        "後車箱, 後車行李箱",
+                        "主要部份",
+                        "象鼻",
+                        "旅行箱",
+                        "(鐵路、公路等的)幹線",
+                        "大血管, 神經幹",
+                        "洗礦槽"
+                    ],
+                    "pattern": "trunk",
+                    "name": "複數為\"trunks\""
+                },
+                {
+                    "pattern": "通常為複數\"trunks\":",
+                    "definitions": [
+                        "游泳褲",
+                        "男用運動短褲"
+                    ],
+                    "name": "通常為複數\"trunks\":"
+                }
+            ],
+            "synonyms": [
+                "bin",
+                "box",
+                "caddy",
+                "case",
+                "casket",
+                "chest",
+                "locker"
+            ]
+        },
+        "動詞": {
+            "simple": [
+                {
+                    "definitions": [
+                        "槽內洗選...(礦砂)"
+                    ],
+                    "pattern": "trunk ...(A)",
+                    "name": "及物"
+                }
+            ],
+            "tags": [
+                "此動詞過去式與過去分詞為\"trunked\"|現在分詞為\"trunking\"|第三者單數現在式為\"trunks\""
+            ],
+            "synonyms": []
+        }
+    }
+}

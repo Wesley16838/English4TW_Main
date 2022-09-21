@@ -4,8 +4,14 @@ import NotePage from "pages/NotePage";
 import NewNotePage from "pages/NewNotePage";
 import NoteContentPage from "pages/NoteContentPage";
 import { shallowEqual, useSelector } from "react-redux";
+import SentenceAnalysisPage from "pages/SentenceAnalysisPage";
+import SentenceExamplesPage from "pages/SentenceExamplesPage";
 const NoteStack = createStackNavigator();
-
+const forFade = ({ current }: { current: any }) => ({
+  cardStyle: {
+    opacity: current.progress,
+  },
+})
 const NoteStackNavigator = () => {
   const { isLoggedIn }: any = useSelector(
     (state: any) => state.user,
@@ -36,6 +42,21 @@ const NoteStackNavigator = () => {
           name={"NoteContentPage"}
           component={NoteContentPage}
           options={{ animationEnabled: false, gestureEnabled: false }}
+        />
+      )}
+      {isLoggedIn && (
+        <NoteStack.Screen
+          name={"SentenceAnalysisPage"}
+          component={SentenceAnalysisPage}
+          options={{ cardStyleInterpolator: forFade, gestureEnabled: false }}
+        />
+      )}
+      {isLoggedIn && (
+        <NoteStack.Screen
+          name={"SentenceExamplesPage"}
+          component={SentenceExamplesPage}
+          options={{ cardStyleInterpolator: forFade, gestureEnabled: false }}
+          initialParams={{ sentence: "" }}
         />
       )}
     </NoteStack.Navigator>

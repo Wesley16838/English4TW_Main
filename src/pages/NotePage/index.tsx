@@ -34,6 +34,8 @@ import { getTag } from "services/tag";
 import { getAllNotes } from "services/note";
 import { shallowEqual, useSelector } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { useDispatch } from "react-redux";
+import { resetNextPage } from "actions/page";
 
 const NoteItem: React.FC<NItem> = ({ word, index, id }) => {
   const navigation = useNavigation<StackNavigationProp<any>>();
@@ -66,6 +68,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
   const [notes, setNotes] = useState<any>([]);
   const [tags, setTags] = useState<any>([]);
   const [tagsData, setTagsData] = useState<any>([]);
+  const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { isLoggedIn }: any = useSelector(
     (state: any) => state.user,
@@ -98,7 +101,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
     isError: noteIsError,
     refetch: noteRefetch,
     isSuccess: noteIsSuccess,
-  } = getAllNotes([isLoggedIn], onSuccessFetchNotes, onErrorFetchNotes, {
+  } = getAllNotes([], onSuccessFetchNotes, onErrorFetchNotes, {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
@@ -262,7 +265,7 @@ const NotePage = ({ navigation }: { navigation: any }) => {
               <ActivityIndicator size="large" />
             ) : (
               <>
-                {(tagData !== undefined && tagData !== "Unauthorized") && renderTaglist()}
+                { (tagData !== undefined && tagData !== "Unauthorized") && renderTaglist() }
                 { (notes !== undefined && notes !== "Unauthorized") && renderNoteList() }
               </>
             )

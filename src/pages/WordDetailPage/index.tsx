@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -10,15 +10,16 @@ import {
   Modal,
   Alert,
   Share,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
-import _, { indexOf } from "lodash";
+import _ from "lodash";
 import Button from "components/Button/Button";
 import ModalContainer from "components/Modal/Modal";
 import Label from "components/Label/Label";
 import images from "assets/images";
 import { DEVICE_HEIGHT, DEVICE_WIDTH } from "pages/SplashPage";
 import {
-  QueryClient,
   useMutation,
   useQuery,
   useQueryClient,
@@ -26,10 +27,8 @@ import {
 import { Colors, Spacing, Typography } from "styles";
 import LinearGradientLayout from "components/LinearGradientLayout";
 import { useNavigation, RouteProp, useRoute } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { IItem } from "types/pages/word";
 import Accordion from "components/Accordion";
-import axios from "axios";
 import authDeviceStorage from "services/authDeviceStorage";
 import api from "services/api";
 import deviceStorage from "services/deviceStorage";
@@ -40,31 +39,57 @@ import { setSetting } from "actions/setting";
 import Toast from "react-native-root-toast";
 import { propertyObj, speechObj, speedOptions } from "utils/constants";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { getSavedWords } from "services/word";
+import { isCloseToBottom, isCloseToTop } from "utils/helper";
+import TabView from "components/TabView/TabView";
 
-const local_json_file = require("../../assets/words/lay.json");
+let layoutOrder: any[] = [[], []];
+let cloneLayoutOrder: any[] = [[], []];
+let layoutLength = [0, 0];
 
 const WordDetailPage = () => {
-  const [accordion, setAccordion] = useState<boolean[]>([]);
+ 
+  const [accordion, setAccordion] = useState<any>([[], []]);
   const [speedModalVisible, setSpeedModalVisible] = useState<boolean>(false);
+  const [borderPosition, setBorderPosition] = useState({
+    top: true,
+    bottom: false
+  })
+
   const dispatch: Dispatch<any> = useDispatch();
   const scrollViewRef: any = useRef(null);
   const queryClient = useQueryClient();
-  let layoutOrder: any[] = [];
-  let cloneLayoutOrder: any[] = [];
-  let layoutLength = 0;
-  let wordBody: {} | null | undefined = null;
+
+  let wordBody: any[] = []
   const navigation = useNavigation<StackNavigationProp<any>>();
   const route: RouteProp<
     { params: { word: string; history: string } },
     "params"
   > = useRoute();
   const { word, history } = route.params;
-
-  const savedWordData: any = queryClient.getQueryData("saved_words");
+  useEffect(() => {
+    return () => {
+        // componentwillunmount in functional component.
+        // Anything in here is fired on component unmount.
+      layoutOrder = [[], []];
+      cloneLayoutOrder = [[], []];
+      layoutLength = [0, 0];
+    }
+}, [])
+  const { data: savedWordData, error, isError, refetch } = getSavedWords(
+    [],
+    () => {},
+    () => {},
+    {
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+    }
+  );
   const saved =
-    savedWordData.find(
+    savedWordData && savedWordData.find(
       (item: any) => item.word.toLowerCase() === word.toLowerCase()
-    ) || null;
+    );
+
 
   const { speed }: any = useSelector(
     (state: any) => state.setting,
@@ -95,7 +120,6 @@ const WordDetailPage = () => {
     fetchWord,
     {
       onSuccess: async (data) => {
-        const array: boolean[] = [];
         const jsonValue = history ? JSON.parse(history) : [];
         const index = history
           ? jsonValue.map((e: IItem) => e.word)?.indexOf(word)
@@ -113,7 +137,7 @@ const WordDetailPage = () => {
           `${word}`,
           JSON.stringify({ word: data, date: loginDate })
         );
-        setAccordion(array);
+
       },
       onError: () => {},
       cacheTime: 1000 * 60 * 60 * 12, // half day
@@ -129,7 +153,7 @@ const WordDetailPage = () => {
       } as any)[speed],
     });
   };
-  const handleBack = () => navigation.goBack();
+  const handleBack = () => navigation.pop();
   const handleNext = () => navigation.push("SentenceAnalysisPage");
 
   const renderDef: any = (obj: any, defIndex: number) => {
@@ -176,10 +200,12 @@ const WordDetailPage = () => {
     }
   };
 
-  const wordObj = wordInfo?.content || local_json_file?.content;
-  wordBody =
+  const wordObjs = wordInfo && (wordInfo?.tabs ? wordInfo.tabs.map((tab: any) => tab.content) : [wordInfo.content])
+  wordInfo && wordObjs.map((wordObj: any, wordObjIndex: number) => {
+    const wordItem =
     isSuccess &&
     Object.keys(wordObj).map((words: any, wordIndex: number) => {
+      if(words === "成語") return;
       return (
         /* 詞彙區 */
         <View style={{ flexDirection: "column" }} key={`wordBody${wordIndex}`}>
@@ -201,18 +227,22 @@ const WordDetailPage = () => {
               <Label title={speechObj[words]} />
               {Object.keys(wordObj[words]).map((property) => {
                 if (property !== "simple" && property !== "tags") {
-                  layoutLength++;
                   return (
                     <Text
                       key={`${words}${propertyObj[property]}`}
                       style={styles.propertyText}
                       onPress={() => {
-                        const index = layoutOrder.findIndex(
-                          (i) => i.name === `${words}_${property}`
+                        const index = layoutOrder[wordObjIndex].findIndex(
+                          (i: { name: string; }) => i.name === `${words}_${property}`
                         );
                         scrollViewRef.current.scrollTo({
-                          y: layoutOrder[index].height.y,
+                          y: layoutOrder[wordObjIndex][index].height.y,
                           animated: true,
+                        });
+                        setAccordion((prev:boolean[][]) => {
+                          const arr = JSON.parse(JSON.stringify(prev))
+                          arr[wordObjIndex][index] = true
+                          return arr
                         });
                       }}
                     >
@@ -223,7 +253,7 @@ const WordDetailPage = () => {
               })}
             </View>
             {/* 解釋區 */}
-            {wordObj[words]["simple"].map((def: any, index: number) => {
+            {wordObj[words]["simple"] && wordObj[words]["simple"].map((def: any, index: number) => {
               return (
                 <View
                   style={{ marginTop: index !== 0 ? 20 : 0 }}
@@ -238,7 +268,18 @@ const WordDetailPage = () => {
           {Object.keys(wordObj[words]).map(
             (property: string, propertyIndex: number) => {
               if (property !== "simple" && property !== "tags") {
-                layoutOrder.push({ name: `${words}_${property}` });
+                const index = layoutOrder[wordObjIndex].findIndex(
+                  (i: { name: string; }) => i.name === `${words}_${property}`
+                );
+                if(index === -1) {
+                  layoutOrder[wordObjIndex].push({ name: `${words}_${property}` });
+                  layoutLength[wordObjIndex]++;
+                  setAccordion((existingItems: any) => {
+                    const arr = JSON.parse(JSON.stringify(existingItems))
+                    arr[wordObjIndex].push(false)
+                    return arr
+                  });
+                }
               }
               let accordionBody = null;
               accordionBody = wordObj[words][property].map(
@@ -262,55 +303,57 @@ const WordDetailPage = () => {
                   }
                 }
               );
-
+              const layoutIndex = layoutOrder[wordObjIndex].findIndex(
+                (i: { name: string; }) => i.name === `${words}_${property}`
+              );
               return (
                 <View
                   onLayout={(event) => {
                     // set base height for each section
                     if (property !== "simple" && property !== "tags") {
-                      const layoutIndex = layoutOrder.findIndex(
-                        (i) => i.name === `${words}_${property}`
-                      );
+                     
                       const newHeight = event.nativeEvent.layout;
-                      layoutOrder[layoutIndex] = {
-                        ...layoutOrder[layoutIndex],
+                      layoutOrder[wordObjIndex][layoutIndex] = {
+                        ...layoutOrder[wordObjIndex][layoutIndex],
                         height: newHeight,
                       };
-                      if (layoutLength > 0) {
-                        layoutLength--;
+                      if (layoutLength[wordObjIndex] > 0) {
+                        layoutLength[wordObjIndex]--;
                       }
                     }
-                    // update height base on previous height
-                    if (layoutLength === 0) {
-                      for (let i = 0; i < layoutOrder.length - 1; i++) {
+
+                    if (layoutLength[wordObjIndex] === 0) {
+                      for (let i = 0; i < layoutOrder[wordObjIndex].length - 1; i++) {
                         // 不同類別
                         if (
-                          layoutOrder[i].name.split("_")[0] !==
-                          layoutOrder[i + 1].name.split("_")[0]
+                          layoutOrder[wordObjIndex][i].name.split("_")[0] !==
+                          layoutOrder[wordObjIndex][i + 1].name.split("_")[0]
                         ) {
-                          if (cloneLayoutOrder.length === 0) {
-                            layoutOrder[i + 1].height.y =
-                              layoutOrder[i].height.y +
-                              layoutOrder[i + 1].height.y;
+                          if (cloneLayoutOrder[wordObjIndex].length === 0) {
+                            layoutOrder[wordObjIndex][i + 1].height.y =
+                              layoutOrder[wordObjIndex][i].height.y +
+                              layoutOrder[wordObjIndex][i + 1].height.y;
                           } else {
                             // next height = current height + height difference between next and current + increased height
-                            layoutOrder[i + 1].height.y =
-                              layoutOrder[i].height.y +
-                              (cloneLayoutOrder[i + 1].height.y -
-                                cloneLayoutOrder[i].height.y) +
-                              (layoutOrder[i].height.height -
-                                cloneLayoutOrder[i].height.height);
+                            layoutOrder[wordObjIndex][i + 1].height.y =
+                              layoutOrder[wordObjIndex][i].height.y +
+                              (cloneLayoutOrder[wordObjIndex][i + 1].height.y -
+                                cloneLayoutOrder[wordObjIndex][i].height.y) +
+                              (layoutOrder[wordObjIndex][i].height.height -
+                                cloneLayoutOrder[wordObjIndex][i].height.height);
                           }
                         } else {
                           // 同類別
-                          layoutOrder[i + 1].height.y =
-                            layoutOrder[i].height.y +
-                            layoutOrder[i].height.height;
+                          layoutOrder[wordObjIndex][i + 1].height.y =
+                            layoutOrder[wordObjIndex][i].height.y +
+                            layoutOrder[wordObjIndex][i].height.height;
                         }
                       }
-                      if (cloneLayoutOrder.length === 0)
-                        cloneLayoutOrder = _.cloneDeep(layoutOrder);
+                      if (cloneLayoutOrder[wordObjIndex].length === 0){
+                        cloneLayoutOrder[wordObjIndex] = _.cloneDeep(layoutOrder[wordObjIndex]);
+                      }
                     }
+
                   }}
                   key={`${words}_${property}_${propertyIndex}`}
                 >
@@ -320,14 +363,21 @@ const WordDetailPage = () => {
                       content={accordionBody}
                       key={`accordion${propertyIndex}`}
                       onOpen={() => {
+                        
                         const obj = Object.keys(wordObj[words]);
-                        layoutLength =
+                        layoutLength[wordObjIndex] =
                           obj.length -
                           obj.indexOf(property) -
                           (obj.indexOf("simple") > obj.indexOf(property)
                             ? 1
                             : 0);
+                          setAccordion((prev:boolean[][]) => {
+                            const arr = JSON.parse(JSON.stringify(prev))
+                            arr[wordObjIndex][layoutIndex] = !arr[layoutIndex]
+                            return arr
+                          });
                       }}
+                      isActived={accordion[wordObjIndex][layoutIndex]}
                     />
                   )}
                 </View>
@@ -337,10 +387,12 @@ const WordDetailPage = () => {
         </View>
       );
     });
+    wordBody.push(wordItem)
+  });
   // && wordObj[words][property].length !== 0 // && accordionBody.length !== 0
 
   const handleOnSearch = () =>
-    navigation.navigate("字典", { screen: "DictionaryPage" });
+    navigation.pop();
   const handleOnShare = async () => {
     try {
       const result = await Share.share({
@@ -441,6 +493,7 @@ const WordDetailPage = () => {
       },
     }
   );
+
   return (
     <>
       <Modal
@@ -468,11 +521,20 @@ const WordDetailPage = () => {
             contentContainerStyle={{ flexGrow: 1 }}
             showsVerticalScrollIndicator={false}
             ref={scrollViewRef}
+            onScroll={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
+                if(isCloseToTop(event)) {
+                  setBorderPosition({top: true, bottom: false})
+                } else if (isCloseToBottom(event)) {
+                  setBorderPosition({top: false, bottom: true})
+                } else {
+                  setBorderPosition({top: false, bottom: false})
+                }
+              }}
+              scrollEventThrottle={400}
           >
             <View style={styles.sectionRow}>
               <View style={styles.actionsheet}>
                 <Button
-                  title=""
                   image={images.icons.leftarrow_icon}
                   buttonStyle={{ height: 20, width: 12 }}
                   imageSize={{ height: 20, width: 12, marginRight: 0 }}
@@ -480,7 +542,6 @@ const WordDetailPage = () => {
                   onPress={() => handleBack()}
                 />
                 <Button
-                  title=""
                   image={images.icons.rightarrow_disable_icon}
                   buttonStyle={{ height: 20, width: 12 }}
                   imageSize={{ height: 20, width: 12, marginRight: 0 }}
@@ -489,7 +550,6 @@ const WordDetailPage = () => {
                 />
               </View>
               <Button
-                title=""
                 image={images.icons.search_icon}
                 buttonStyle={{ height: 30, width: 30 }}
                 imageSize={{ height: 30, width: 30, marginRight: 0 }}
@@ -508,7 +568,6 @@ const WordDetailPage = () => {
               }}
             >
               <Button
-                title=""
                 image={images.icons.share_icon}
                 buttonStyle={{ height: 30, width: 30 }}
                 imageSize={{ height: 30, width: 30, marginRight: 0 }}
@@ -516,7 +575,6 @@ const WordDetailPage = () => {
                 onPress={() => handleOnShare()}
               />
               <Button
-                title=""
                 image={
                   saved ? images.icons.favorited_icon : images.icons.saved_icon
                 }
@@ -536,7 +594,6 @@ const WordDetailPage = () => {
               />
               {saved && (
                 <Button
-                  title=""
                   image={
                     saved?.pinned === 1
                       ? images.icons.push_pin_selected_icon
@@ -549,7 +606,6 @@ const WordDetailPage = () => {
                 />
               )}
               <Button
-                title=""
                 image={images.icons.speed_secondary_icon}
                 buttonStyle={{ height: 30, width: 30 }}
                 imageSize={{ height: 30, width: 30, marginRight: 0 }}
@@ -560,14 +616,37 @@ const WordDetailPage = () => {
             {isLoading ? (
               <ActivityIndicator size="large" />
             ) : (
-              // <TabView
-              //   titles={["發音一", "發音二"]}
-              //   customStyle={{ width: DEVICE_WIDTH - 40, marginHorizontal: 20 }}
-              //   children={tabBody}
-              // />
-              <View style={{ alignItems: "center" }}>{wordBody}</View>
+              <TabView
+                titles={["發音一", "發音二"]}
+                customStyle={{ width: DEVICE_WIDTH - 40, marginHorizontal: 20 }}
+                children={wordBody}
+              />
+              // <View style={{ alignItems: "center" }}>{wordBody}</View>
             )}
           </ScrollView>
+          <View style={{position: "absolute", right: 9, bottom: 9}}>
+            <Button
+              image={borderPosition.top ? images.icons.go_up_disable_icon : images.icons.go_up_icon}
+              buttonStyle={{ height: 50, width: 50 }}
+              imageSize={{ height: 50, width: 50, marginRight: 0 }}
+              type=""
+              onPress={() => {
+                scrollViewRef.current.scrollTo({
+                  y: 0,
+                  animated: true,
+                });
+              }}
+              isDisabled={borderPosition.top}
+            />
+            <Button
+              image={ borderPosition.bottom ? images.icons.go_down_disable_icon : images.icons.go_down_icon }
+              buttonStyle={{ height: 50, width: 50 }}
+              imageSize={{ height: 50, width: 50, marginRight: 0 }}
+              type=""
+              onPress={() => scrollViewRef.current.scrollToEnd({ animated: true })}
+              isDisabled={borderPosition.bottom}
+            />
+          </View>
         </SafeAreaView>
       </LinearGradientLayout>
     </>

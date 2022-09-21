@@ -1,7 +1,7 @@
 import * as actionTypes from "actions/actionTypes";
 const initialState: any = {
-  nextPage: "",
-  parameter: {},
+  nextPage: [""],
+  parameter: [""],
 };
 
 const page = (state: any = initialState, action: any): any => {
@@ -14,9 +14,7 @@ const page = (state: any = initialState, action: any): any => {
       };
     case actionTypes.RESET_NEXT_PAGE:
       return {
-        ...state,
-        nextPage: "",
-        parameter: {},
+        ...initialState
       };
   }
   return state;

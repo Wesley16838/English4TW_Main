@@ -36,7 +36,7 @@ import Toast from "react-native-root-toast";
 import { getUserWords } from "services/word";
 import { levelOptions } from "utils/constants";
 import { StackNavigationProp } from "@react-navigation/stack";
-
+// daily word change everytime
 const HomePage = () => {
   const [searchWord, setSearchWord] = useState("");
   const [sentence, setSentence] = useState("");
@@ -45,6 +45,7 @@ const HomePage = () => {
     second: "",
   });
   const [modalVisible, setModalVisible] = useState(false);
+  const [usersWord, setUsersWord] = useState<any>("")
   const firstInput = React.createRef<TextInput>();
   const secondInput = React.createRef<TextInput>();
   const navigation = useNavigation<StackNavigationProp<any>>();
@@ -65,16 +66,25 @@ const HomePage = () => {
   const onSuccessFetchUserWords = (data: any) => {
     if (data === "Unauthorized") {
     } else {
+      const word = data[levelOptions.indexOf(level)][Math.floor(Math.random() * 2)];
+      setUsersWord(word)
     }
   };
 
   const onErrorFetchUserWords = (data: any) => {};
 
-  const { data, isLoading } = getUserWords(
-    [isLoggedIn],
+  const { data, isLoading, refetch } = getUserWords(
+    [],
     onSuccessFetchUserWords,
-    onErrorFetchUserWords
+    onErrorFetchUserWords,
+    {
+      enable: false
+    }
   );
+
+  useEffect(()=> {
+    if(isLoggedIn) refetch()
+  }, [isLoggedIn])
 
   const filterData = words.filter(
     (word) => searchWord && word.indexOf(searchWord.toUpperCase()) === 0
@@ -173,10 +183,10 @@ const HomePage = () => {
     Speech.speak(str);
   };
 
-  const userWord =
-    isLoggedIn &&
-    data !== undefined &&
-    data[levelOptions.indexOf(level)][Math.floor(Math.random() * 2)];
+  // const userWord =
+  //   isLoggedIn &&
+  //   data !== undefined &&
+  //   data[levelOptions.indexOf(level)][Math.floor(Math.random() * 2)];
 
   const reset = () => {
     if (!!sentence) setSentence("");
@@ -209,6 +219,8 @@ const HomePage = () => {
           defaultValue={level}
           onConfirm={(option: string) => {
             dispatch(setSetting({ level: option }));
+            const word = data[levelOptions.indexOf(level)][Math.floor(Math.random() * 2)];
+            setUsersWord(word)
             setModalVisible(!modalVisible);
           }}
         />
@@ -373,15 +385,15 @@ const HomePage = () => {
                     </View>
                     <View style={styles.daily}>
                       <Card
-                        title={userWord.uw}
-                        detail={userWord.def}
-                        OnClick={() => handleOnwordDetailPage(userWord.uw)}
+                        title={usersWord.uw}
+                        detail={usersWord.def}
+                        OnClick={() => handleOnwordDetailPage(usersWord.uw)}
                         customStyle={{ width: DEVICE_WIDTH - 40 }}
                         buttons={[
                           {
                             name: "volumn",
                             path: Images.icons.volume_icon,
-                            onClick: () => handleOnWordPlay(userWord.uw),
+                            onClick: () => handleOnWordPlay(usersWord.uw),
                           },
                         ]}
                       />

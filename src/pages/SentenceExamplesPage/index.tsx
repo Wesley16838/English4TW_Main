@@ -16,95 +16,60 @@ import ModalContainer from "components/Modal/Modal";
 import Images from "assets/images";
 import { DEVICE_WIDTH, DEVICE_HEIGHT } from "pages/SplashPage";
 import { Colors, Typography } from "styles";
-import { Dispatch } from "redux";
+import { compose, Dispatch } from "redux";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { setSetting } from "actions/setting";
 import { speedOptions } from "utils/constants";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { useQuery } from "react-query";
+import api from "services/api";
+import images from "assets/images";
+import * as Speech from "expo-speech";
+import authDeviceStorage from "services/authDeviceStorage";
+import { setNextPage } from "actions/page";
 
 const SentenceExamplesPage = () => {
   const navigation = useNavigation<StackNavigationProp<any>>();
   const [animation, setAnimation] = useState(new Animated.Value(0));
-  const [sentences, setSentences] = useState([
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-    {
-      sentence:
-        "Lee puts a spin on what happened last nigh. That just aggravates me.",
-      uri:
-        "https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act1_shakespeare.mp3",
-    },
-  ]);
+  const route: RouteProp<
+    { params: { sentence: string } },
+    "params"
+  > = useRoute();
+  const { sentence } = route.params;
   const [modalVisible, setModalVisible] = useState(false);
   const dispatch: Dispatch<any> = useDispatch();
   const { speed }: any = useSelector(
     (state: any) => state.setting,
     shallowEqual
   );
+  const { nextPage, parameter }: any = useSelector(
+    (state: any) => state.page,
+    shallowEqual
+  );
+  const fetchSentences = async () => {
+    try {
+      let token = null;
+      const result = await authDeviceStorage.getItem("JWT_TOKEN");
+      if (result) token = JSON.parse(result).token;
+      const param = encodeURI("lay ...(事) on the line:");
+      const res: any = await api.get(
+        `https://www.english4tw.com/api/sentences?usage=${param}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "content-type": "application/json",
+          },
+        }
+        )
+      if (res.data.message === "Unauthorized")
+        throw new Error("Unauthorized");
+      
+      return res.data.data.s[0];
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  const {data, isLoading} = useQuery(sentence, fetchSentences)
   const backdrop = {
     transform: [
       {
@@ -137,6 +102,13 @@ const SentenceExamplesPage = () => {
     navigation.goBack();
   };
   const handleBack = () => {
+    console.log('handleBack')
+    const nextPageArr = ["SentenceExamplesPage"]
+    const parameterArr = [sentence]
+    dispatch(setNextPage({
+      page: nextPageArr,
+      parameter: parameterArr
+    }))
     Animated.timing(animation, {
       toValue: 0,
       duration: 200,
@@ -144,29 +116,36 @@ const SentenceExamplesPage = () => {
     }).start();
     navigation.goBack();
   };
-  const handleNext = () => {
-    Animated.timing(animation, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-    navigation.push("SentenceAnalysisPage");
-  };
 
+  const handleOnPlay = (str: string) => {
+    Speech.speak(str, {
+      rate: ({
+        慢: 0.8,
+        中: 1,
+        快: 1.3,
+      } as any)[speed],
+    });
+  };
   const renderSentencesSection = () => {
-    return sentences.map((sentence, index) => {
+    return data && (data as []).map((sentence, index) => {
       return (
         <View key={index} style={styles.sectionBody}>
-          <Image style={styles.volumeIcon} source={Images.icons.volume_icon} />
+           <Button
+              image={images.icons.volume_icon}
+              buttonStyle={{ height: 30, width: 30 }}
+              imageSize={{ height: 30, width: 30, marginRight: 0 }}
+              type=""
+              onPress={() => handleOnPlay(sentence)}
+            />
           <Text
             style={{
-              width: DEVICE_WIDTH - 70,
+              width: DEVICE_WIDTH - 85,
               fontSize: 17,
               lineHeight: 25.5,
-              marginTop: 10,
+              marginLeft: 10,
             }}
           >
-            {sentence.sentence}
+            {sentence}
           </Text>
         </View>
       );
@@ -221,14 +200,6 @@ const SentenceExamplesPage = () => {
                   type=""
                   onPress={() => handleBack()}
                 />
-                <Button
-                  title=""
-                  image={Images.icons.rightarrow_disable_icon}
-                  buttonStyle={{ height: 20, width: 12 }}
-                  imageSize={{ height: 20, width: 12, marginRight: 0 }}
-                  type=""
-                  onPress={() => handleNext()}
-                />
               </View>
               <Button
                 title=""
@@ -257,7 +228,7 @@ const SentenceExamplesPage = () => {
                   />
                 </TouchableOpacity>
               </View>
-              <Text style={styles.title}>(人) put a spin on (事)</Text>
+              <Text style={styles.title}>{sentence}</Text>
               <View style={{ marginBottom: 90 }}>
                 {renderSentencesSection()}
               </View>
@@ -298,7 +269,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
   },
   topicTitle: {
-    fontWeight: "bold",
+    ...Typography.base_bold,
   },
   topicIcon: {
     height: 16,
@@ -323,8 +294,9 @@ const styles = StyleSheet.create({
 
   sectionBody: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingHorizontal: 25,
+    marginTop: 15,
   },
   actionsheet: {
     width: 77,

@@ -15,6 +15,8 @@ import Images from "./src/assets/images";
 import { Colors } from "styles";
 import Layout from "components/Layout";
 import { DEVICE_WIDTH } from "pages/SplashPage";
+import { useDispatch } from "react-redux";
+import { resetNextPage } from "actions/page";
 
 const Tab = createBottomTabNavigator();
 
